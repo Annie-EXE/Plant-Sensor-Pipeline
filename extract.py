@@ -1,10 +1,9 @@
 """Pipeline Script: Extracting pipeline data from the API endpoint"""
 
-
-import requests
+import json
 from os import environ
 from dotenv import load_dotenv
-import json
+import requests
 
 
 def get_plant_data(plant_id: int, api_path: str) -> dict:
@@ -12,7 +11,7 @@ def get_plant_data(plant_id: int, api_path: str) -> dict:
     Retrieves the data for a given
     plant and stores it as a dict
     """
-    response = requests.get(f"{api_path}{plant_id}")
+    response = requests.get(f"{api_path}/plants/{plant_id}")
     plant_data = response.json()
 
     plant_data_id = plant_data.get("plant_id")
@@ -61,7 +60,7 @@ def get_all_plants_data(api_path: str) -> list[dict]:
     """
     all_plants_data = []
 
-    for i in range(50):
+    for i in range(51):
         plant_data = get_plant_data(i, api_path)
         all_plants_data.append(plant_data)
 
@@ -71,7 +70,7 @@ def get_all_plants_data(api_path: str) -> list[dict]:
 def create_json_file(data: list[dict], file_path: str) -> str:
     """
     Creates a .json file and 
-    uploads data to it.
+    uploads data to it
     """
     with open(file_path, "w") as json_file:
         json.dump(data, json_file, indent=4)
@@ -89,4 +88,11 @@ if __name__ == "__main__":
 
     all_plants_data = get_all_plants_data(api_path)
 
+    for plant in all_plants_data:
+
+        if plant["name"]:
+
+            plant["name"] = plant["name"].replace(u"\u2018", "'").replace(u"\u2019", "'")
+
     create_json_file(all_plants_data, plant_data_file_path)
+        

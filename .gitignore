@@ -161,3 +161,4 @@ cython_debug/
 
 .env
 recent_plant_data.json
+venv/

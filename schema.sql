@@ -32,20 +32,21 @@ CREATE TABLE IF NOT EXISTS plant (
     plant_scientific_name TEXT, 
     plant_origin SMALLINT,
     last_watered TIMESTAMP, 
-    botanist_id SMALLINT NOT NULL,
     PRIMARY KEY (plant_id),
     FOREIGN KEY (plant_origin) REFERENCES plant_origin(plant_origin_id),
-    FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id)
 );
 
 CREATE TABLE IF NOT EXISTS reading_information (
     reading_information_id INT GENERATED ALWAYS AS IDENTITY,
     plant_id SMALLINT NOT NULL,
-    plant_reading_time TIMESTAMP NOT NULL, 
+    plant_reading_time TIMESTAMP NOT NULL,
+    botanist_id SMALLINT NOT NULL,
     soil_moisture DECIMAL,
     sunlight_id INT,
     temperature DECIMAL NOT NULL,
     PRIMARY KEY (reading_information_id),
     FOREIGN KEY (sunlight_id) REFERENCES sunlight_type(sunlight_type_id),
-    FOREIGN KEY (plant_id) REFERENCES plant(plant_id)
+    FOREIGN KEY (plant_id) REFERENCES plant(plant_id),
+    FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id)
+
 );

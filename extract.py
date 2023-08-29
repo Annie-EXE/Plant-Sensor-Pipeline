@@ -1,13 +1,18 @@
 """Pipeline Script: Extracting pipeline data from the API endpoint"""
 
+
 import requests
+from os import environ
+from dotenv import load_dotenv
+import json
+
 
 def get_plant_data(plant_id: int, api_path: str) -> dict:
     """
     Retrieves the data for a given
     plant and stores it as a dict
     """
-    response = requests.get(f"https://data-eng-plants-api.herokuapp.com/plants/{plant_id}")
+    response = requests.get(f"{api_path}{plant_id}")
     plant_data = response.json()
 
     plant_data_id = plant_data.get("plant_id")
@@ -49,4 +54,39 @@ def get_plant_data(plant_id: int, api_path: str) -> dict:
     return plant_data_dict
 
 
-def get_all_plants_data()
+def get_all_plants_data(api_path: str) -> list[dict]:
+    """
+    Extracts the data for all 50
+    plants, into a list of dicts
+    """
+    all_plants_data = []
+
+    for i in range(50):
+        plant_data = get_plant_data(i, api_path)
+        all_plants_data.append(plant_data)
+
+    return all_plants_data
+
+
+def create_json_file(data: list[dict], file_path: str) -> str:
+    """
+    Creates a .json file and 
+    uploads data to it.
+    """
+    with open(file_path, "w") as json_file:
+        json.dump(data, json_file, indent=4)
+    
+    return "Data processed!"
+
+
+if __name__ == "__main__":
+
+    load_dotenv()
+
+    api_path = environ.get("API_PATH")
+
+    plant_data_file_path = "recent_plant_data.json"
+
+    all_plants_data = get_all_plants_data(api_path)
+
+    create_json_file(all_plants_data, plant_data_file_path)

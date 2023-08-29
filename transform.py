@@ -137,7 +137,7 @@ def get_recording_taken_date_time(datetime_string: str) -> datetime | str:
     Args: 
         datetime_string (str): A string containing date time information
     Returns:
-        datetime: A date time object
+        datetime: A date time object relating to when the recording was taken
     """
     try:
         date_object = datetime.strptime(datetime_string, "%Y-%m-%d %H:%M:%S")
@@ -162,6 +162,80 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
     return df
 
 
+def get_latitude(origin_string: list[str]) -> float:
+    """
+    Return information related to the latitude of the plant
+
+    Args:
+        origin_string (list[str]): A list containing information related to the latitude,
+        longitude and country of origin for the plant
+
+    Returns:
+        float: A float relating to the latitude of the plant 
+
+    """
+    try:
+        return origin_string[0]
+    except:
+        return "N/A"
+
+
+def get_longitude(origin_string: list[str]) -> float:
+    """
+    Return information related to the longitude of the plant
+
+    Args:
+        origin_string (list[str]): A list containing information related to the latitude,
+        longitude and country of origin for the plant
+
+    Returns:
+        float: A float relating to the longitude of the plant 
+
+    """
+    try:
+        return origin_string[1]
+    except:
+        return "N/A"
+
+
+def get_location(origin_string: list[str]) -> float:
+    """
+    Return information related to the location of the plant
+
+    Args:
+        origin_string (list[str]): A list containing information related to the latitude,
+        longitude and country of origin for the plant
+
+    Returns:
+        float: A float relating to the location of the plant 
+
+    """
+    try:
+        return ", ".join(origin_string[2:])
+    except:
+        return "N/A"
+
+
+def build_location_columns(df: DataFrame) -> DataFrame:
+    """
+    Extract locational information from "plant_origin" column and built three columns
+    for: plant_latitude, plant_longitude, plant_location.
+
+    Args: 
+        df (DataFrame): A pandas DataFrame 
+    Returns:
+        DataFrame: A pandas DataFrame 
+    """
+
+    df["plant_latitude"] = df.apply(
+        lambda row: get_latitude(row["plant_origin"]), axis=1)
+    df["plant_longitude"] = df.apply(
+        lambda row: get_longitude(row["plant_origin"]), axis=1)
+    df["plant_location"] = df.apply(
+        lambda row: get_location(row["plant_origin"]), axis=1)
+    return df
+
+
 def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
     """
     Build a DataFrame from a a list of dictionaries.
@@ -175,9 +249,10 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)
+    # df = transform_scientific_name_column(df) # TO DO: Pull list values into a string
     df = transform_last_watered_column(df)
     df = transform_recording_taken_column(df)
-    df = built_location_columns(df)
+    df = build_location_columns(df)
 
     return df
 

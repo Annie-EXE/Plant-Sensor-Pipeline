@@ -62,10 +62,10 @@ def transform_email_column_using_regex(df: DataFrame) -> DataFrame:
     Extract email from affiliation column and add to existing 'botanist_email' column.
 
     Args: 
-        df (DataFrame): A pandas DataFrame 
+        df (DataFrame): A pandas DataFrame containing all plant data
 
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
     try:
         email_pattern = r"([\w.-]+@[\w.-]+)"
@@ -79,12 +79,12 @@ def transform_email_column_using_regex(df: DataFrame) -> DataFrame:
 
 def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
     """
-    Extract phone number from affiliation column and add to existing 'botanist_phone_number' column.
+    Extract phone number from "botanist_phone_number" column and add to existing column.
 
     Args: 
-        df (DataFrame): A pandas DataFrame 
+        df (DataFrame): A pandas DataFrame containing all plant data
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
     try:
         email_pattern = r"(\+[\d-]+)"
@@ -94,6 +94,39 @@ def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
         return df
     except:
         "N/A"
+
+
+def get_scientific_name(scientific_name: list[str]) -> str:
+    """
+    Extract scientific names from a list and normalize into a string
+
+    Args:
+        scientific_name (list[str]): A list containing strings related to the scientific name of a plant
+
+    Returns:
+        str: A string containing one of more of the scientific names for a plant
+    """
+    try:
+        if len(scientific_name) == 1:
+            return scientific_name[0]
+        else:
+            return ", ".join(scientific_name)
+    except:
+        return "N/A"
+
+
+def transform_scientific_name_column(df: DataFrame) -> DataFrame:
+    """
+    Extract scientific name from "scientific_name" column and add to existing column.
+
+    Args: 
+        df (DataFrame): A pandas DataFrame containing all plant data
+    Returns:
+        DataFrame: A pandas DataFrame containing all plant data
+    """
+    df["scientific_name"] = df.apply(
+        lambda row: get_scientific_name(row["scientific_name"]), axis=1)
+    return df
 
 
 def get_last_watered_date_time(datetime_string: str) -> datetime | str:
@@ -119,9 +152,9 @@ def transform_last_watered_column(df: DataFrame) -> DataFrame:
     in date time corrected format.
 
     Args: 
-        df (DataFrame): A pandas DataFrame 
+        df (DataFrame): A pandas DataFrame containing all plant data
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
 
     df["last_watered"] = df.apply(
@@ -152,9 +185,9 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
     in date time corrected format.
 
     Args: 
-        df (DataFrame): A pandas DataFrame 
+        df (DataFrame): A pandas DataFrame containing all plant data
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
 
     df["recording_taken"] = df.apply(
@@ -162,7 +195,7 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_latitude(origin_string: list[str]) -> float:
+def get_latitude(origin_string: list[str]) -> float | str:
     """
     Return information related to the latitude of the plant
 
@@ -176,11 +209,12 @@ def get_latitude(origin_string: list[str]) -> float:
     """
     try:
         return origin_string[0]
-    except:
+    except Exception as e:
+        print(f"Error retrieving latitude: {e}")
         return "N/A"
 
 
-def get_longitude(origin_string: list[str]) -> float:
+def get_longitude(origin_string: list[str]) -> float | str:
     """
     Return information related to the longitude of the plant
 
@@ -194,11 +228,12 @@ def get_longitude(origin_string: list[str]) -> float:
     """
     try:
         return origin_string[1]
-    except:
+    except Exception as e:
+        print(f"Error retrieving longitude: {e}")
         return "N/A"
 
 
-def get_location(origin_string: list[str]) -> float:
+def get_location(origin_string: list[str]) -> str:
     """
     Return information related to the location of the plant
 
@@ -212,7 +247,8 @@ def get_location(origin_string: list[str]) -> float:
     """
     try:
         return ", ".join(origin_string[2:])
-    except:
+    except Exception as e:
+        print(f"Error retrieving location: {e}")
         return "N/A"
 
 
@@ -222,9 +258,9 @@ def build_location_columns(df: DataFrame) -> DataFrame:
     for: plant_latitude, plant_longitude, plant_location.
 
     Args: 
-        df (DataFrame): A pandas DataFrame 
+        df (DataFrame): A pandas DataFrame containing all plant data
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
 
     df["plant_latitude"] = df.apply(
@@ -233,6 +269,54 @@ def build_location_columns(df: DataFrame) -> DataFrame:
         lambda row: get_longitude(row["plant_origin"]), axis=1)
     df["plant_location"] = df.apply(
         lambda row: get_location(row["plant_origin"]), axis=1)
+    df["plant_latitude"] = df["plant_latitude"].astype(float)
+    df["plant_longitude"] = df["plant_longitude"].astype(float)
+    return df
+
+
+def get_valid_temperature(temperature_data: float) -> float | str:
+    """
+    Return temperature value if it meets the following criteria: -40 < temperature_data < 75
+    Else return "N/A"
+
+    Args:
+        temperature_data (float): A float value representing temperature in the data
+
+    Returns: float | str: A float value representing the temperature else return "N/A" for outliers
+    """
+    if temperature_data < -40 or temperature_data > 75:
+        return "N/A"
+    return temperature_data
+
+
+def transform_temperature_column(df: DataFrame) -> DataFrame:
+    """
+    Remove outliers from "temperature" data.
+
+    Args: 
+        df (DataFrame): A pandas DataFrame containing all plant data
+    Returns:
+        DataFrame: A pandas DataFrame containing all plant data
+    """
+    df["temperature"] = df.apply(
+        lambda row: get_valid_temperature(row["temperature"]), axis=1)
+    return df
+
+
+def normalize_column_text(df: DataFrame) -> DataFrame:
+    """
+    Normalize text within column entries to be lowercase
+
+    Args: 
+        df (DataFrame): A pandas DataFrame containing all plant data
+    Returns:
+        DataFrame: A pandas DataFrame containing all plant data
+    """
+    df["botanist_name"] = df["botanist_name"].apply(lambda x: x.lower())
+    df["plant_name"] = df["plant_name"].apply(lambda x: x.lower())
+    df["plant_cycle"] = df["plant_cycle"].apply(lambda x: x.lower())
+    df["plant_location"] = df["plant_location"].apply(lambda x: x.lower())
+
     return df
 
 
@@ -243,16 +327,18 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
     Args:
         plant_data (list[dict]): A Python list of dictionaries containing the parsed JSON data without nested dictionaries.
     Returns:
-        DataFrame: A pandas DataFrame 
+        DataFrame: A pandas DataFrame containing all plant data
     """
     df = pd.DataFrame(plant_data)
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)
-    # df = transform_scientific_name_column(df) # TO DO: Pull list values into a string
+    # df = transform_scientific_name_column(df)
     df = transform_last_watered_column(df)
     df = transform_recording_taken_column(df)
     df = build_location_columns(df)
+    df = transform_temperature_column(df)
+    df = normalize_column_text(df)
 
     return df
 

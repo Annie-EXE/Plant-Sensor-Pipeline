@@ -10,39 +10,42 @@ CREATE TABLE IF NOT EXISTS sunlight_type (
     PRIMARY KEY (sunlight_type_id)
 );
 
-CREATE TABLE IF NOT EXISTS sunlight (
-    sunlight_id INT GENERATED ALWAYS AS IDENTITY,
-    plant_id SMALLINT NOT NULL,
-    PRIMARY KEY (sunlight_id),
-    FOREIGN KEY (sunlight_id) REFERENCES sunlight_type(sunlight_type_id)
-);
-
-CREATE TABLE IF NOT EXISTS soil_moisture (
-    soil_moisture_id INT GENERATED ALWAYS AS IDENTITY,
-    plant_id SMALLINT NOT NULL,
-    soil_moisture_value DECIMAL NOT NULL, 
-    PRIMARY KEY (soil_moisture_id)
-);
-
-CREATE TABLE IF NOT EXISTS temperature (
-    temp_id INT GENERATED ALWAYS AS IDENTITY,
-    plant_id SMALLINT NOT NULL,
-    temperature_value DECIMAL NOT NULL, 
-    PRIMARY KEY (temp_id)
-);
-
 CREATE TABLE IF NOT EXISTS plant_origin (
-    origin_id GENERATED ALWAYS AS IDENTITY,
+    plant_origin_id INT GENERATED ALWAYS AS IDENTITY,
     latitude SMALLINT NOT NULL,
     longitude SMALLINT NOT NULL,
     country TEXT NOT NULL,
-    PRIMARY KEY (origin_id)
+    PRIMARY KEY (plant_origin_id)
 );
 
 CREATE TABLE IF NOT EXISTS botanist (
-    botanist_id GENERATED ALWAYS AS IDENTITY,
+    botanist_id INT GENERATED ALWAYS AS IDENTITY,
     botanist_name TEXT NOT NULL,
     botanist_email TEXT,
     botanist_phone_number TEXT,
     PRIMARY KEY (botanist_id)
+);
+
+CREATE TABLE IF NOT EXISTS plant (
+    plant_id SMALLINT NOT NULL UNIQUE,
+    plant_name TEXT NOT NULL,
+    plant_scientific_name TEXT, 
+    plant_origin SMALLINT,
+    last_watered TIMESTAMP, 
+    botanist_id SMALLINT NOT NULL,
+    PRIMARY KEY (plant_id),
+    FOREIGN KEY (plant_origin) REFERENCES plant_origin(plant_origin_id),
+    FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id)
+);
+
+CREATE TABLE IF NOT EXISTS reading_information (
+    reading_information_id INT GENERATED ALWAYS AS IDENTITY,
+    plant_id SMALLINT NOT NULL,
+    plant_reading_time TIMESTAMP NOT NULL, 
+    soil_moisture DECIMAL,
+    sunlight_id INT,
+    temperature DECIMAL NOT NULL,
+    PRIMARY KEY (reading_information_id),
+    FOREIGN KEY (sunlight_id) REFERENCES sunlight_type(sunlight_type_id),
+    FOREIGN KEY (plant_id) REFERENCES plant(plant_id)
 );

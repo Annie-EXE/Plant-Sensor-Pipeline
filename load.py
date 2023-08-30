@@ -10,8 +10,7 @@ from psycopg2.extensions import connection
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    return connect(dbname=config["DB_NAME"],
-                   user=config["DB_USER"],
+    return connect(user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
@@ -98,4 +97,12 @@ if __name__ == "__main__":
 
     config = environ
 
-    get_db_connection(config)
+    conn = get_db_connection(config)
+
+    cur = conn.cursor()
+
+    print(cur)
+
+    print(conn)
+
+    conn.close()

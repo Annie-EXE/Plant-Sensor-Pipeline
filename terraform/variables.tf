@@ -1,19 +1,15 @@
-variable "access_key" {
+variable "REGION" {
   type = string
 }
 
-variable "secret_key" {
+variable "RDS_USERNAME" {
   type = string
 }
 
-variable "region" {
+variable "RDS_PASSWORD" {
   type = string
 }
 
-variable "rds_username" {
-  type = string
-}
-
-variable "rds_password" {
+variable "RDS_PORT" {
   type = string
 }

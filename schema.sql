@@ -12,10 +12,12 @@ CREATE TABLE IF NOT EXISTS sunlight_type (
 
 CREATE TABLE IF NOT EXISTS plant_origin (
     plant_origin_id INT GENERATED ALWAYS AS IDENTITY,
+    plant_id INT NOT NULL,
     latitude SMALLINT NOT NULL,
     longitude SMALLINT NOT NULL,
     country TEXT NOT NULL,
-    PRIMARY KEY (plant_origin_id)
+    PRIMARY KEY (plant_origin_id), 
+    FOREIGN KEY (plant_id) REFERENCES plant(plant_id)
 );
 
 CREATE TABLE IF NOT EXISTS botanist (

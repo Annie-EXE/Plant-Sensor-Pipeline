@@ -53,8 +53,6 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
         plant["temperature"] = data.get("temperature")
 
         flattened_data.append(plant)
-        print(flattened_data)
-        break
 
     return flattened_data
 
@@ -326,6 +324,23 @@ def transform_temperature_column(df: DataFrame) -> DataFrame:
     return df
 
 
+def normalize_text_in_list(list_containing_strings: list[str]) -> list[str]:
+    """
+    Normalize each string entry within a list to only contain lowercase characters
+
+    Args:
+        list_containing_strings (list[str]): A list containing strings of alphabetical characters
+        with no case normalization
+
+    Returns:
+        list[str]: A list containing strings of alphabetical characters
+        with case normalized to lowercase
+    """
+    if not isinstance(list_containing_strings, list):
+        return None
+    return [entry.lower() for entry in list_containing_strings]
+
+
 def normalize_column_text(df: DataFrame) -> DataFrame:
     """
     Normalize text within column entries to be lowercase
@@ -345,6 +360,8 @@ def normalize_column_text(df: DataFrame) -> DataFrame:
         lambda x: x.lower() if type(x) == str else x)
     df["scientific_name"] = df["scientific_name"].apply(
         lambda x: x.lower() if type(x) == str else x)
+    df["conditions"] = df.apply(
+        lambda row: normalize_text_in_list(row["conditions"]), axis=1)
     return df
 
 
@@ -358,6 +375,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
     df = pd.DataFrame(plant_data)
+    df = df.dropna(subset=["plant_name"])
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)

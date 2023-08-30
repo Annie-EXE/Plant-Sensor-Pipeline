@@ -53,8 +53,6 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
         plant["temperature"] = data.get("temperature")
 
         flattened_data.append(plant)
-        print(flattened_data)
-        break
 
     return flattened_data
 
@@ -358,6 +356,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
     df = pd.DataFrame(plant_data)
+    df = df.dropna(subset=["plant_name"])
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)

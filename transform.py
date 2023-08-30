@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
 
 
 def load_data(json_path: str) -> list[dict]:
@@ -288,8 +289,8 @@ def build_location_columns(df: DataFrame) -> DataFrame:
     df["plant_location"] = df.apply(
         lambda row: get_location(row["plant_origin"]), axis=1)
 
-    # df["plant_latitude"] = df["plant_latitude"].astype(float)
-    # df["plant_longitude"] = df["plant_longitude"].astype(float)
+    df["plant_latitude"] = df["plant_latitude"].astype(float)
+    df["plant_longitude"] = df["plant_longitude"].astype(float)
 
     return df
 
@@ -364,6 +365,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
     df = build_location_columns(df)
     df = transform_temperature_column(df)
     df = normalize_column_text(df)
+    df = df.replace(np.nan, None)
 
     return df
 

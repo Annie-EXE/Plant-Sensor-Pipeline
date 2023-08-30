@@ -10,9 +10,9 @@ from psycopg2.extensions import connection
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    return connect(dbname=config["DB_NAME"],
-                   user=config["DB_USER"],
+    return connect(user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
+                #    dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
 

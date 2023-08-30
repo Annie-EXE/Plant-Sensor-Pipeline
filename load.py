@@ -17,7 +17,6 @@ def get_db_connection(config: dict) -> connection:
                    port=config["DB_PORT"])
 
 
-# TODO Typehint for data?
 def insert_into_plant_table(conn: connection, data) -> None:
     """Inserts information into plant table"""
 
@@ -49,7 +48,7 @@ def insert_into_plant_origin_table(conn: connection, data) -> None:
     cur.commit()
 
 
-def insert_into_botanist_table(conn: connection, data) -> None:
+def insert_into_botanist_table(conn: connection, row) -> None:
     """Inserts information into botanist table"""
 
     cur = conn.cursor()
@@ -58,7 +57,9 @@ def insert_into_botanist_table(conn: connection, data) -> None:
                 (botanist_name, botanist_email, botanist_phone_number)
                 Values
                 (%s, %s, %s)""",
-                [data, data, data])
+                [row.botanist_name,
+                 row.botanist_email,
+                 row.botanist_phone_number])
 
     cur.commit()
 
@@ -69,10 +70,10 @@ def insert_into_water_history_table(conn: connection, data) -> None:
     cur = conn.cursor()
 
     cur.execute("""INSERT INTO water_history
-                (water_history_id, time_watered, plant_id)
+                (time_watered, plant_id)
                 Values
-                (%s, %s, %s)""",
-                [data, data, data])
+                (%s, %s)""",
+                [data.plant_id, data.last_watered])
 
     cur.commit()
 
@@ -87,7 +88,9 @@ def insert_into_reading_information_table(conn: connection, data) -> None:
                 temperature, soil_moisture, sunlight_id)
                 Values
                 (%s, %s, %s, %s, %s, %s)""",
-                [data, data, data, data, data, data])
+                [data.plant_id, data.last_watered,
+                 data, data.temperature, data.soil_moisture,
+                 data])
 
     cur.commit()
 

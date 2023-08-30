@@ -26,14 +26,21 @@ CREATE TABLE IF NOT EXISTS botanist (
     PRIMARY KEY (botanist_id)
 );
 
+CREATE TABLE IF NOT EXISTS water_history (
+    water_history_id SMALLINT NOT NULL UNIQUE,
+    time_watered TIMESTAMP NOT NULL,
+    PRIMARY KEY (water_history_id)
+);
+
 CREATE TABLE IF NOT EXISTS plant (
     plant_id SMALLINT NOT NULL UNIQUE,
     plant_name TEXT NOT NULL,
     plant_scientific_name TEXT, 
     plant_origin SMALLINT,
-    last_watered TIMESTAMP, 
+    water_history_id INT,
     PRIMARY KEY (plant_id),
     FOREIGN KEY (plant_origin) REFERENCES plant_origin(plant_origin_id),
+    FOREIGN KEY (water_history_id) REFERENCES water_history(water_history_id)
 );
 
 CREATE TABLE IF NOT EXISTS reading_information (
@@ -48,5 +55,4 @@ CREATE TABLE IF NOT EXISTS reading_information (
     FOREIGN KEY (sunlight_id) REFERENCES sunlight_type(sunlight_type_id),
     FOREIGN KEY (plant_id) REFERENCES plant(plant_id),
     FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id)
-
 );

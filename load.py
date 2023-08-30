@@ -3,7 +3,8 @@
 from os import environ
 
 from dotenv import load_dotenv
-from psycopg2 import connect, connection
+from psycopg2 import connect
+from psycopg2.extensions import connection
 
 
 def get_db_connection(config: dict) -> connection:
@@ -96,5 +97,5 @@ def insert_into_reading_information_table(conn: connection, data) -> None:
 
 
 if __name__ == "__main__":
+
     get_db_connection()
-    pass

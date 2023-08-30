@@ -72,9 +72,9 @@ def insert_into_water_history_table(conn: connection, data) -> None:
     cur = conn.cursor()
 
     cur.execute("""INSERT INTO water_history
-                (water_history_id, time_watered)
+                (water_history_id, time_watered, plant_id)
                 Values
-                (%s, %s);
+                (%s, %s, %s);
                 """([data]))
 
     cur.commit()

@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS botanist (
 CREATE TABLE IF NOT EXISTS water_history (
     water_history_id SMALLINT NOT NULL UNIQUE,
     time_watered TIMESTAMP NOT NULL,
+    plant_id INT NOT NULL,
     PRIMARY KEY (water_history_id)
 );
 

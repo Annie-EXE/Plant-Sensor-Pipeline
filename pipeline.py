@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 from extract import (
     get_all_plants_data,
+    clean_unicode_from_plant_data,
     create_json_file
 )
 
@@ -25,12 +26,7 @@ if __name__ == "__main__":
 
     all_plants_data = get_all_plants_data(api_path)
 
-    for plant in all_plants_data:
-
-        if plant["name"]:
-
-            plant["name"] = plant["name"].replace(
-                u"\u2018", "'").replace(u"\u2019", "'")
+    cleaned_plants_data = clean_unicode_from_plant_data(all_plants_data)
 
     create_json_file(all_plants_data, plant_data_file_path)
 

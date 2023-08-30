@@ -6,49 +6,47 @@ from dotenv import load_dotenv
 import requests
 
 
-def get_plant_data(plant_id: int, api_path: str) -> dict:
+def get_plant_data_from_api(plant_id: int, api_path: str) -> dict:
     """
-    Retrieves the data for a given
-    plant and stores it as a dict
+    Retrieves the data for a given plant and stores it as a dict
+
+    Args:
+        plant_id (int): A number representing the id value of the plant for which
+        data will be accessed.
+
+        api_path (str): A string containing the api path
+
+    Returns:
+        dict: A python dictionary containing retrieved data from the API
     """
     response = requests.get(f"{api_path}/plants/{plant_id}")
-    plant_data = response.json()
+    data = response.json()
 
-    plant_data_id = plant_data.get("plant_id")
-    name = plant_data.get("name")  # string
-    scientific_name = plant_data.get("scientific_name")  # list of strings
-    cycle = plant_data.get("cycle")  # string
-    last_watered = plant_data.get("last_watered")  # string
+    return data
 
-    recording_time = plant_data.get("recording_taken")  # string
-    temperature = plant_data.get("temperature")  # float
-    soil_moisture = plant_data.get("soil_moisture")  # float
-    sunlight_details = plant_data.get("sunlight")  # list of strings
 
-    # list with latitude, longitude, and country
+def process_plant_data_from_api(plant_data: dict) -> dict:
+    """
+    Process API data and extract relevant information into a new dict
+    """
     origin_location = plant_data.get("origin_location", [])
-    origin_latitude = origin_location[0] if len(origin_location) > 0 else None
-    origin_longitude = origin_location[1] if len(origin_location) > 1 else None
-    origin_country = origin_location[-1] if len(origin_location) > 2 else None
-
-    botanist_details = plant_data.get("botanist", {})  # dict
 
     plant_data_dict = {
-        "plant_id": plant_data_id,
-        "name": name,
-        "scientific_name": scientific_name,
-        "cycle": cycle,
-        "last_watered": last_watered,
-        "recording_time": recording_time,
-        "temperature": temperature,
-        "soil_moisture": soil_moisture,
-        "sunlight_details": sunlight_details,
+        "plant_id": plant_data.get("plant_id"),
+        "name": plant_data.get("name"),
+        "scientific_name": plant_data.get("scientific_name"),
+        "cycle": plant_data.get("cycle"),
+        "last_watered": plant_data.get("last_watered"),
+        "recording_time": plant_data.get("recording_taken"),
+        "temperature": plant_data.get("temperature"),
+        "soil_moisture": plant_data.get("soil_moisture"),
+        "sunlight_details": plant_data.get("sunlight"),
         "origin_location": {
-            "origin_latitude": origin_latitude,
-            "origin_longitude": origin_longitude,
-            "origin_country": origin_country
+            "origin_latitude": origin_location[0] if len(origin_location) > 0 else None,
+            "origin_longitude": origin_location[1] if len(origin_location) > 1 else None,
+            "origin_country": origin_location[-1] if len(origin_location) > 2 else None
         },
-        "botanist_details": botanist_details
+        "botanist_details":  plant_data.get("botanist", {})
     }
 
     return plant_data_dict
@@ -62,10 +60,33 @@ def get_all_plants_data(api_path: str) -> list[dict]:
     all_plants_data = []
 
     for i in range(51):
-        plant_data = get_plant_data(i, api_path)
-        all_plants_data.append(plant_data)
+        raw_plant_data = get_plant_data_from_api(i, api_path)
+        processed_plant_data = process_plant_data_from_api(raw_plant_data)
+        all_plants_data.append(processed_plant_data)
 
     return all_plants_data
+
+
+def clean_unicode_from_plant_data(plants_data: list[dict]) -> list[dict]:
+    """
+    Remove unicode characters which appear in the plant `name` data
+
+    Args:
+        plants_data (list[dict]): A list containing dictionaries of processed plant data
+        with uncleaned name data
+
+    Returns:
+        list[dict]: A list containing dictionaries of processed plant data
+        with unicode removed from `name` data
+    """
+    for plant in plants_data:
+
+        if plant["name"]:
+
+            plant["name"] = plant["name"].replace(
+                u"\u2018", "").replace(u"\u2019", "")
+
+    return plants_data
 
 
 def create_json_file(data: list[dict], file_path: str) -> str:
@@ -89,11 +110,6 @@ if __name__ == "__main__":
 
     all_plants_data = get_all_plants_data(api_path)
 
-    for plant in all_plants_data:
-
-        if plant["name"]:
-
-            plant["name"] = plant["name"].replace(
-                u"\u2018", "'").replace(u"\u2019", "'")
+    cleaned_plants_data = clean_unicode_from_plant_data(all_plants_data)
 
     create_json_file(all_plants_data, plant_data_file_path)

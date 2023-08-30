@@ -38,3 +38,4 @@ pytest
 python-dateutil
 requests 
 psycopg2
+streamlit

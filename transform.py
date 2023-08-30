@@ -369,6 +369,8 @@ if __name__ == "__main__":
 
     plant_df = build_plant_dataframe(flatted_plant_data)
 
+    print(plant_df)
+
     # # text = "Bird of paraDise"
     # # normalised_text = normalise_text(text)
     # # print(normalised_text)

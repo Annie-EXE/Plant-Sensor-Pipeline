@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
 
 
 def load_data(json_path: str) -> list[dict]:
@@ -74,6 +75,28 @@ def transform_email_column_using_regex(df: DataFrame) -> DataFrame:
     return df
 
 
+def normalize_email(phone_number: str) -> str:
+    """
+    Normalize phone_number to all have the same format
+
+    Args:
+        phone_number (str): A string containing the extracted phone_number
+
+    Returns:
+        str: A normalized phone_number string
+    """
+
+    if isinstance(phone_number, float):
+        return phone_number
+
+    phone_number = phone_number.replace(".", "-")
+
+    if "-" not in phone_number and len(phone_number) == 10:
+        phone_number = f"{phone_number[:3]}-{phone_number[3:6]}-{phone_number[6:]}"
+
+    return phone_number
+
+
 def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
     """
     Extract phone number from "botanist_phone_number" column and add to existing column.
@@ -84,9 +107,11 @@ def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
 
-    number_pattern = r"([\+]?\d{1,3}[-.]?\d{3}[.-]?\d{3}[.-]?\d{4})|(\d{3}[.-]?\d{3}[.-]?\d{4})"
+    number_pattern = r"(\d{3}[.-]?\d{3}[.-]?\d{4})"
     df["botanist_phone_number"] = df["botanist_phone_number"].str.extract(
-        number_pattern).apply(lambda x: " ".join(x.dropna()), axis=1)
+        number_pattern)
+    df["botanist_phone_number"] = df.apply(
+        lambda row: normalize_email(row["botanist_phone_number"]), axis=1)
     return df
 
 
@@ -264,8 +289,8 @@ def build_location_columns(df: DataFrame) -> DataFrame:
     df["plant_location"] = df.apply(
         lambda row: get_location(row["plant_origin"]), axis=1)
 
-    # df["plant_latitude"] = df["plant_latitude"].astype(float)
-    # df["plant_longitude"] = df["plant_longitude"].astype(float)
+    df["plant_latitude"] = df["plant_latitude"].astype(float)
+    df["plant_longitude"] = df["plant_longitude"].astype(float)
 
     return df
 
@@ -299,6 +324,23 @@ def transform_temperature_column(df: DataFrame) -> DataFrame:
     return df
 
 
+def normalize_text_in_list(list_containing_strings: list[str]) -> list[str]:
+    """
+    Normalize each string entry within a list to only contain lowercase characters
+
+    Args:
+        list_containing_strings (list[str]): A list containing strings of alphabetical characters
+        with no case normalization
+
+    Returns:
+        list[str]: A list containing strings of alphabetical characters
+        with case normalized to lowercase
+    """
+    if not isinstance(list_containing_strings, list):
+        return None
+    return [entry.lower() for entry in list_containing_strings]
+
+
 def normalize_column_text(df: DataFrame) -> DataFrame:
     """
     Normalize text within column entries to be lowercase
@@ -318,6 +360,8 @@ def normalize_column_text(df: DataFrame) -> DataFrame:
         lambda x: x.lower() if type(x) == str else x)
     df["scientific_name"] = df["scientific_name"].apply(
         lambda x: x.lower() if type(x) == str else x)
+    df["conditions"] = df.apply(
+        lambda row: normalize_text_in_list(row["conditions"]), axis=1)
     return df
 
 
@@ -331,6 +375,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
     df = pd.DataFrame(plant_data)
+    df = df.dropna(subset=["plant_name"])
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)
@@ -340,6 +385,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
     df = build_location_columns(df)
     df = transform_temperature_column(df)
     df = normalize_column_text(df)
+    df = df.replace(np.nan, None)
 
     return df
 

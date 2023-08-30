@@ -7,6 +7,8 @@ from os import environ
 from dotenv import load_dotenv
 from dateutil.parser import parse
 
+from unittest.mock import MagicMock, patch
+
 from extract import (
     get_plant_data,
     get_all_plants_data,
@@ -22,7 +24,7 @@ all_plants_data = get_all_plants_data(api_path)
 
 def is_valid_timestamp(timestamp_str: str) -> bool:
     """
-    Verifies whether a given 
+    Verifies whether a given
     string is a valid timestamp
     """
     try:
@@ -42,6 +44,26 @@ def test_get_plant_data_produces_dict():
 
     for plant in all_plants_data:
         assert isinstance(plant, dict)
+
+
+@patch("requests.get")
+def test_get_plant_data_calls_api(mock_get, mock_api_data, mock_nested_data):
+    """
+    Test `get_plant_data` to see if the `requests.get` function is called correctly
+    """
+    mock_response = MagicMock()
+    mock_response.json.return_value = mock_api_data
+
+    expected_result = mock_nested_data
+
+    mock_get.return_value = mock_response
+    mock_id = 1
+    mock_api = 'mock_api_path'
+    result = get_plant_data(mock_id, mock_api)
+
+    assert mock_get.call_count == 1
+    assert mock_response.json.call_count == 1
+    assert result == expected_result
 
 
 def test_get_plant_data_has_correct_information():

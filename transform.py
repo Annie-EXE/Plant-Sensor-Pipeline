@@ -53,6 +53,8 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
         plant["temperature"] = data.get("temperature")
 
         flattened_data.append(plant)
+        print(flattened_data)
+        break
 
     return flattened_data
 

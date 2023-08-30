@@ -15,23 +15,24 @@ def get_plant_data(plant_id: int, api_path: str) -> dict:
     plant_data = response.json()
 
     plant_data_id = plant_data.get("plant_id")
-    name = plant_data.get("name") # string
-    scientific_name = plant_data.get("scientific_name") # list of strings
-    cycle = plant_data.get("cycle") # string
-    last_watered = plant_data.get("last_watered") # string
+    name = plant_data.get("name")  # string
+    scientific_name = plant_data.get("scientific_name")  # list of strings
+    cycle = plant_data.get("cycle")  # string
+    last_watered = plant_data.get("last_watered")  # string
 
-    recording_time = plant_data.get("recording_taken") # string
-    temperature = plant_data.get("temperature") # float
-    soil_moisture = plant_data.get("soil_moisture") # float
-    sunlight_details = plant_data.get("sunlight") # list of strings
+    recording_time = plant_data.get("recording_taken")  # string
+    temperature = plant_data.get("temperature")  # float
+    soil_moisture = plant_data.get("soil_moisture")  # float
+    sunlight_details = plant_data.get("sunlight")  # list of strings
 
-    origin_location = plant_data.get("origin_location", []) # list with latitude, longitude, and country
+    # list with latitude, longitude, and country
+    origin_location = plant_data.get("origin_location", [])
     origin_latitude = origin_location[0] if len(origin_location) > 0 else None
     origin_longitude = origin_location[1] if len(origin_location) > 1 else None
     origin_country = origin_location[-1] if len(origin_location) > 2 else None
 
-    botanist_details = plant_data.get("botanist", {}) # dict
-    
+    botanist_details = plant_data.get("botanist", {})  # dict
+
     plant_data_dict = {
         "plant_id": plant_data_id,
         "name": name,
@@ -74,7 +75,7 @@ def create_json_file(data: list[dict], file_path: str) -> str:
     """
     with open(file_path, "w") as json_file:
         json.dump(data, json_file, indent=4)
-    
+
     return "Data processed!"
 
 
@@ -92,7 +93,7 @@ if __name__ == "__main__":
 
         if plant["name"]:
 
-            plant["name"] = plant["name"].replace(u"\u2018", "'").replace(u"\u2019", "'")
+            plant["name"] = plant["name"].replace(
+                u"\u2018", "'").replace(u"\u2019", "'")
 
     create_json_file(all_plants_data, plant_data_file_path)
-        

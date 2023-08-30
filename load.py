@@ -98,4 +98,12 @@ if __name__ == "__main__":
 
     config = environ
 
-    get_db_connection(config)
+    conn = get_db_connection(config)
+
+    cur = conn.cursor()
+
+    print(cur)
+
+    print(conn)
+
+    conn.close()

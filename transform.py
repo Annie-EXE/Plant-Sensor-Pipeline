@@ -12,7 +12,6 @@ def load_data(json_path: str) -> list[dict]:
 
     Args:
         json_data (str): Either a JSON-formatted string or a path to a JSON file.
-
     Returns:
         list[dict]: A Python list of dictionaries containing the parsed JSON data.
     """
@@ -31,7 +30,6 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
 
     Args:
         loaded_json_data: (list[dict]): A Python list of dictionaries containing the parsed JSON data.
-
     Returns:
         list[dict]: A Python list of dictionaries containing the parsed JSON data without nested dictionaries.
     """

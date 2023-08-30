@@ -13,7 +13,8 @@ from pandas import DataFrame
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    return connect(user=config["DB_USER"],
+    return connect(dbname=config["DB_NAME"],
+                   user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
                    dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
@@ -122,7 +123,7 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 
 #     all_conditions_values = [value.lower() for sublist in data['conditions']
 #                              if sublist is not None for value in sublist]
-    
+
 #     with conn.cursor() as cur:
 
 #         cur.executemany("""INSERT INTO condition
@@ -136,7 +137,7 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 
 #     all_conditions_values = [value.lower() for sublist in data['conditions']
 #                              if sublist is not None for value in sublist]
-    
+
 #     with conn.cursor() as cur:
 
 #         cur.executemany("""INSERT INTO condition

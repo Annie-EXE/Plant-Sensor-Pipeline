@@ -162,5 +162,7 @@ cython_debug/
 .env
 recent_plant_data.json
 terraform/*.tfvars
+terraform
 venv/
+.vscode/
 mock_transform_data.json

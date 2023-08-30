@@ -66,14 +66,12 @@ def transform_email_column_using_regex(df: DataFrame) -> DataFrame:
     Returns:
         DataFrame: A pandas DataFrame containing all plant data
     """
-    try:
-        email_pattern = r"([\w.-]+@[\w.-]+)"
-        df["botanist_email"] = df["botanist_email"].str.extract(
-            email_pattern)
-        df["botanist_email"] = df["botanist_email"].fillna("N/A")
-        return df
-    except:
-        "N/A"
+
+    email_pattern = r"([\w.-]+@[\w.-]+)"
+    df["botanist_email"] = df["botanist_email"].str.extract(
+        email_pattern)
+
+    return df
 
 
 def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
@@ -85,14 +83,11 @@ def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
     Returns:
         DataFrame: A pandas DataFrame containing all plant data
     """
-    try:
-        email_pattern = r"(\+[\d-]+)"
-        df["botanist_phone_number"] = df["botanist_phone_number"].str.extract(
-            email_pattern)
-        df["botanist_phone_number"] = df["botanist_phone_number"].fillna("N/A")
-        return df
-    except:
-        "N/A"
+
+    number_pattern = r"([\+]?\d{1,3}[-.]?\d{3}[.-]?\d{3}[.-]?\d{4})|(\d{3}[.-]?\d{3}[.-]?\d{4})"
+    df["botanist_phone_number"] = df["botanist_phone_number"].str.extract(
+        number_pattern).apply(lambda x: " ".join(x.dropna()), axis=1)
+    return df
 
 
 def get_scientific_name(scientific_name: list[str]) -> str:
@@ -111,7 +106,7 @@ def get_scientific_name(scientific_name: list[str]) -> str:
         else:
             return ", ".join(scientific_name)
     except:
-        return "N/A"
+        return None
 
 
 def transform_scientific_name_column(df: DataFrame) -> DataFrame:
@@ -142,7 +137,7 @@ def get_last_watered_date_time(datetime_string: str) -> datetime | str:
             datetime_string, "%a, %d %b %Y %H:%M:%S %Z")
         return date_object
     except:
-        return "N/A"
+        return None
 
 
 def transform_last_watered_column(df: DataFrame) -> DataFrame:
@@ -162,7 +157,7 @@ def transform_last_watered_column(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_recording_taken_date_time(datetime_string: str) -> datetime | str:
+def get_recording_taken_date_time(datetime_string: str) -> datetime | None:
     """
     Convert date string from "recording_taken" column to a datetime object
 
@@ -175,7 +170,7 @@ def get_recording_taken_date_time(datetime_string: str) -> datetime | str:
         date_object = datetime.strptime(datetime_string, "%Y-%m-%d %H:%M:%S")
         return date_object
     except:
-        return "N/A"
+        return None
 
 
 def transform_recording_taken_column(df: DataFrame) -> DataFrame:
@@ -194,7 +189,7 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_latitude(origin_string: list[str]) -> float | str:
+def get_latitude(origin_string: list[str]) -> float | None:
     """
     Return information related to the latitude of the plant
 
@@ -207,13 +202,13 @@ def get_latitude(origin_string: list[str]) -> float | str:
 
     """
     try:
-        return origin_string[0]
+        return origin_string.get("origin_latitude")
     except Exception as e:
         print(f"Error retrieving latitude: {e}")
-        return "N/A"
+        return None
 
 
-def get_longitude(origin_string: list[str]) -> float | str:
+def get_longitude(origin_string: list[str]) -> float | None:
     """
     Return information related to the longitude of the plant
 
@@ -226,13 +221,13 @@ def get_longitude(origin_string: list[str]) -> float | str:
 
     """
     try:
-        return origin_string[1]
+        return origin_string.get("origin_longitude")
     except Exception as e:
         print(f"Error retrieving longitude: {e}")
-        return "N/A"
+        return None
 
 
-def get_location(origin_string: list[str]) -> str:
+def get_location(origin_string: list[str]) -> str | None:
     """
     Return information related to the location of the plant
 
@@ -245,10 +240,10 @@ def get_location(origin_string: list[str]) -> str:
 
     """
     try:
-        return ", ".join(origin_string[2:])
+        return origin_string.get("origin_country")
     except Exception as e:
         print(f"Error retrieving location: {e}")
-        return "N/A"
+        return None
 
 
 def build_location_columns(df: DataFrame) -> DataFrame:
@@ -268,23 +263,25 @@ def build_location_columns(df: DataFrame) -> DataFrame:
         lambda row: get_longitude(row["plant_origin"]), axis=1)
     df["plant_location"] = df.apply(
         lambda row: get_location(row["plant_origin"]), axis=1)
-    df["plant_latitude"] = df["plant_latitude"].astype(float)
-    df["plant_longitude"] = df["plant_longitude"].astype(float)
+
+    # df["plant_latitude"] = df["plant_latitude"].astype(float)
+    # df["plant_longitude"] = df["plant_longitude"].astype(float)
+
     return df
 
 
 def get_valid_temperature(temperature_data: float) -> float | str:
     """
     Return temperature value if it meets the following criteria: -40 < temperature_data < 75
-    Else return "N/A"
+    Else return None
 
     Args:
         temperature_data (float): A float value representing temperature in the data
 
-    Returns: float | str: A float value representing the temperature else return "N/A" for outliers
+    Returns: float | str: A float value representing the temperature else return None for outliers
     """
     if temperature_data < -40 or temperature_data > 75:
-        return "N/A"
+        return None
     return temperature_data
 
 
@@ -311,11 +308,16 @@ def normalize_column_text(df: DataFrame) -> DataFrame:
     Returns:
         DataFrame: A pandas DataFrame containing all plant data
     """
-    df["botanist_name"] = df["botanist_name"].apply(lambda x: x.lower())
-    df["plant_name"] = df["plant_name"].apply(lambda x: x.lower())
-    df["plant_cycle"] = df["plant_cycle"].apply(lambda x: x.lower())
-    df["plant_location"] = df["plant_location"].apply(lambda x: x.lower())
-
+    df["botanist_name"] = df["botanist_name"].apply(
+        lambda x: x.lower() if type(x) == str else x)
+    df["plant_name"] = df["plant_name"].apply(
+        lambda x: x.lower() if type(x) == str else x)
+    df["plant_cycle"] = df["plant_cycle"].apply(
+        lambda x: x.lower() if type(x) == str else x)
+    df["plant_location"] = df["plant_location"].apply(
+        lambda x: x.lower() if type(x) == str else x)
+    df["scientific_name"] = df["scientific_name"].apply(
+        lambda x: x.lower() if type(x) == str else x)
     return df
 
 
@@ -332,7 +334,7 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
 
     df = transform_email_column_using_regex(df)
     df = transform_phone_column_using_regex(df)
-    # df = transform_scientific_name_column(df)
+    df = transform_scientific_name_column(df)
     df = transform_last_watered_column(df)
     df = transform_recording_taken_column(df)
     df = build_location_columns(df)
@@ -340,23 +342,6 @@ def build_plant_dataframe(plant_data: list[dict]) -> DataFrame:
     df = normalize_column_text(df)
 
     return df
-
-
-def normalise_text(text: str) -> str:
-    """
-    Convert all characters in a string to lowercase characters
-
-    Args:
-        text (str): A string of characters with unknown character case
-
-    Returns:
-        str: A string of characters with all characters are lower case
-    """
-    return text.lower()
-
-
-def normalise(text):
-    return "".join([x.upper() if i % 2 else x.lower() for i, x in enumerate(text)])
 
 
 if __name__ == "__main__":
@@ -369,8 +354,4 @@ if __name__ == "__main__":
 
     plant_df = build_plant_dataframe(flatted_plant_data)
 
-    # # text = "Bird of paraDise"
-    # # normalised_text = normalise_text(text)
-    # # print(normalised_text)
-
-    # print(plant_df)
+    print(plant_df)

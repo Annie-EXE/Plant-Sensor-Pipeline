@@ -39,3 +39,5 @@ if __name__ == "__main__":
     flatted_plant_data = flatten_data(loaded_data_from_file)
 
     plant_df = build_plant_dataframe(flatted_plant_data)
+
+    print(plant_df)

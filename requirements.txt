@@ -36,3 +36,4 @@ wcwidth==0.2.6
 python-dotenv
 pytest
 python-dateutil
+requests 

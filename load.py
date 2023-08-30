@@ -10,7 +10,8 @@ from psycopg2.extensions import connection
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    return connect(user=config["DB_USER"],
+    return connect(dbname=config["DB_NAME"],
+                   user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
@@ -28,8 +29,8 @@ def insert_into_plant_table(conn: connection, data) -> None:
                 plant_origin,
                 water_history_id)
                 Values
-                (%s, %s, %s, %s);
-                """([data]))
+                (%s, %s, %s, %s)""",
+                [data, data, data, data])
 
     cur.commit()
 
@@ -42,8 +43,8 @@ def insert_into_plant_origin_table(conn: connection, data) -> None:
     cur.execute("""INSERT INTO plant_origin
                 (latitude, longitude, country)
                 Values
-                (%s, %s, %s);
-                """([data]))
+                (%s, %s, %s)""",
+                [data, data, data])
 
     cur.commit()
 
@@ -56,8 +57,8 @@ def insert_into_botanist_table(conn: connection, data) -> None:
     cur.execute("""INSERT INTO botanist
                 (botanist_name, botanist_email, botanist_phone_number)
                 Values
-                (%s, %s, %s);
-                """([data]))
+                (%s, %s, %s)""",
+                [data, data, data])
 
     cur.commit()
 
@@ -70,8 +71,8 @@ def insert_into_water_history_table(conn: connection, data) -> None:
     cur.execute("""INSERT INTO water_history
                 (water_history_id, time_watered, plant_id)
                 Values
-                (%s, %s, %s);
-                """([data]))
+                (%s, %s, %s)""",
+                [data, data, data])
 
     cur.commit()
 
@@ -85,8 +86,8 @@ def insert_into_reading_information_table(conn: connection, data) -> None:
                 (plant_id, plant_reading_time, botanist_id,
                 temperature, soil_moisture, sunlight_id)
                 Values
-                (%s, %s, %s, %s, %s, %s);
-                """([data]))
+                (%s, %s, %s, %s, %s, %s)""",
+                [data, data, data, data, data, data])
 
     cur.commit()
 
@@ -100,9 +101,5 @@ if __name__ == "__main__":
     conn = get_db_connection(config)
 
     cur = conn.cursor()
-
-    print(cur)
-
-    print(conn)
 
     conn.close()

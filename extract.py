@@ -8,8 +8,16 @@ import requests
 
 def get_plant_data_from_api(plant_id: int, api_path: str) -> dict:
     """
-    Retrieves the data for a given
-    plant and stores it as a dict
+    Retrieves the data for a given plant and stores it as a dict
+
+    Args:
+        plant_id (int): A number representing the id value of the plant for which
+        data will be accessed.
+
+        api_path (str): A string containing the api path
+
+    Returns:
+        dict: A python dictionary containing retrieved data from the API
     """
     response = requests.get(f"{api_path}/plants/{plant_id}")
     data = response.json()
@@ -62,13 +70,21 @@ def get_all_plants_data(api_path: str) -> list[dict]:
 def clean_unicode_from_plant_data(plants_data: list[dict]) -> list[dict]:
     """
     Remove unicode characters which appear in the plant `name` data
+
+    Args:
+        plants_data (list[dict]): A list containing dictionaries of processed plant data
+        with uncleaned name data
+
+    Returns:
+        list[dict]: A list containing dictionaries of processed plant data
+        with unicode removed from `name` data
     """
     for plant in plants_data:
 
         if plant["name"]:
 
             plant["name"] = plant["name"].replace(
-                u"\u2018", "'").replace(u"\u2019", "'")
+                u"\u2018", "").replace(u"\u2019", "")
 
     return plants_data
 

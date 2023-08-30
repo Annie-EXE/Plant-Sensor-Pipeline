@@ -9,7 +9,16 @@ from transform import (
 
 
 def test_flatten_data_returns_correct_data(mock_nested_data, mock_flattened_data):
-    """"""
+    """
+    Test `flatten_data` creates a new dictionary and extracts nested data as expected
+
+    Args:
+        mock_nested_data (dict): A mock dictionary representing processed nested data
+        retrieved from the API
+
+        mock_flattened_data (list[dict]): A mock list of dictionaries where all nested
+        data is extracted and flattened 
+    """
     result = flatten_data([mock_nested_data])
     assert result == mock_flattened_data
 
@@ -34,3 +43,5 @@ def test_transform_email_column_using_regex():
     ]
 
     assert result_df["botanist_email"].tolist() == expected_result
+
+def test_transform_

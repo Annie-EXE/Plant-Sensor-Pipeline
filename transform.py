@@ -5,6 +5,7 @@ import json
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
+import re
 
 
 def load_data(json_path: str) -> list[dict]:
@@ -35,6 +36,7 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
         list[dict]: A Python list of dictionaries containing the parsed JSON data without nested dictionaries.
     """
     flattened_data = []
+
     for data in loaded_plant_data:
         plant = {}
         plant["botanist_name"] = data.get("botanist_details").get("name")
@@ -75,7 +77,7 @@ def transform_email_column_using_regex(df: DataFrame) -> DataFrame:
     return df
 
 
-def normalize_email(phone_number: str) -> str:
+def normalize_phone_number(phone_number: str) -> str:
     """
     Normalize phone_number to all have the same format
 
@@ -89,12 +91,10 @@ def normalize_email(phone_number: str) -> str:
     if isinstance(phone_number, float):
         return phone_number
 
-    phone_number = phone_number.replace(".", "-")
+    number = ''.join(char for char in phone_number if char.isdigit())
+    number = f"{number[:3]}-{number[3:6]}-{number[6:]}"
 
-    if "-" not in phone_number and len(phone_number) == 10:
-        phone_number = f"{phone_number[:3]}-{phone_number[3:6]}-{phone_number[6:]}"
-
-    return phone_number
+    return number
 
 
 def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
@@ -107,11 +107,11 @@ def transform_phone_column_using_regex(df: DataFrame) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
 
-    number_pattern = r"(\d{3}[.-]?\d{3}[.-]?\d{4})"
+    number_pattern = r"([(]?\d{3}[.-]?[)]?[(]?\d{3}[.-]?[)]?[(]?\d{4}[.-]?[)]?)"
     df["botanist_phone_number"] = df["botanist_phone_number"].str.extract(
         number_pattern)
     df["botanist_phone_number"] = df.apply(
-        lambda row: normalize_email(row["botanist_phone_number"]), axis=1)
+        lambda row: normalize_phone_number(row["botanist_phone_number"]), axis=1)
     return df
 
 
@@ -397,6 +397,9 @@ if __name__ == "__main__":
     loaded_data_from_file = load_data(json_file_path)
 
     flatted_plant_data = flatten_data(loaded_data_from_file)
+
+    # for entry in flatted_plant_data:
+    #     print(entry["botanist_phone_number"])
 
     plant_df = build_plant_dataframe(flatted_plant_data)
 

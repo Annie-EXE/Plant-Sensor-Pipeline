@@ -16,9 +16,15 @@ from extract import (
 
 
 @patch("requests.get")
-def test_get_plant_data_from_api_calls_correct_functions(mock_get, mock_api_data, mock_nested_data):
+def test_get_plant_data_from_api_calls_correct_functions(mock_get, mock_api_data):
     """
     Test `get_plant_data` to see if the `requests.get` function is called correctly
+
+    Args:
+        mock_get (MagicMock): A MagicMock object used to patch the `requests.get` function
+
+        mock_api_data (dict): A mock dictionary representing unprocessed data
+        retrieved from the API
     """
     mock_response = MagicMock()
     mock_response.json.return_value = mock_api_data
@@ -35,6 +41,13 @@ def test_get_plant_data_from_api_calls_correct_functions(mock_get, mock_api_data
 def test_process_plant_data_from_api(mock_api_data, mock_nested_data):
     """
     Test `process_plant_data_from_api` to check if API data is being processed as expected
+
+    Args:
+        mock_api_data (dict): A mock dictionary representing unprocessed data
+        retrieved from the API
+
+        mock_nested_data (dict): A mock dictionary representing processed nested data
+        retrieved from the API
     """
     result = process_plant_data_from_api(mock_api_data)
     assert result == mock_nested_data
@@ -45,6 +58,16 @@ def test_get_all_plants_data(mock_get_plant_data_from_api, mock_api_data, mock_n
     """
     Test `get_all_plants_data` to ensure a list of dictionaries 
     with the expected processed API data is returned
+
+    Args:
+        mock_get_plant_data_from_api (MagicMock): A MagicMock object used to patch
+        the extract.get_plant_data_from_api function
+
+        mock_api_data (dict): A mock dictionary representing unprocessed data
+        retrieved from the API
+
+        mock_nested_data (dict): A mock dictionary representing processed nested data
+        retrieved from the API
     """
     mock_get_plant_data_from_api.return_value = mock_api_data
     expected_result = [mock_nested_data] * 51

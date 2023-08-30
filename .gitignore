@@ -161,4 +161,5 @@ cython_debug/
 
 .env
 recent_plant_data.json
+terraform/*.tfvars
 venv/

@@ -354,4 +354,10 @@ if __name__ == "__main__":
 
     plant_df = build_plant_dataframe(flatted_plant_data)
 
+    print(type(plant_df['conditions'].iloc[0]))
+
+    plant_df = plant_df.dropna(subset=['last_watered', 'recording_time'])
+
+    plant_df.to_csv('transformed_plant_data.csv')
+
     print(plant_df)

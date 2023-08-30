@@ -29,27 +29,49 @@ def process_plant_data_from_api(plant_data: dict) -> dict:
     """
     Process API data and extract relevant information into a new dict
     """
-    origin_location = plant_data.get("origin_location", [])
+    if 'error' not in plant_data:
 
-    plant_data_dict = {
-        "plant_id": plant_data.get("plant_id"),
-        "name": plant_data.get("name"),
-        "scientific_name": plant_data.get("scientific_name"),
-        "cycle": plant_data.get("cycle"),
-        "last_watered": plant_data.get("last_watered"),
-        "recording_time": plant_data.get("recording_taken"),
-        "temperature": plant_data.get("temperature"),
-        "soil_moisture": plant_data.get("soil_moisture"),
-        "sunlight_details": plant_data.get("sunlight"),
-        "origin_location": {
-            "origin_latitude": origin_location[0] if len(origin_location) > 0 else None,
-            "origin_longitude": origin_location[1] if len(origin_location) > 1 else None,
-            "origin_country": origin_location[-1] if len(origin_location) > 2 else None
-        },
-        "botanist_details":  plant_data.get("botanist", {})
-    }
+        origin_location = plant_data.get("origin_location", [])
 
-    return plant_data_dict
+        plant_data_dict = {
+            "plant_id": plant_data.get("plant_id"),
+            "name": plant_data.get("name"),
+            "scientific_name": plant_data.get("scientific_name"),
+            "cycle": plant_data.get("cycle"),
+            "last_watered": plant_data.get("last_watered"),
+            "recording_time": plant_data.get("recording_taken"),
+            "temperature": plant_data.get("temperature"),
+            "soil_moisture": plant_data.get("soil_moisture"),
+            "sunlight_details": plant_data.get("sunlight"),
+            "origin_location": {
+                "origin_latitude": origin_location[0] if len(origin_location) > 0 else None,
+                "origin_longitude": origin_location[1] if len(origin_location) > 1 else None,
+                "origin_country": origin_location[-1] if len(origin_location) > 2 else None
+            },
+            "botanist_details":  plant_data.get("botanist", {})
+        }
+
+            botanist_details = plant_data.get("botanist", {}) # dict
+            
+            plant_data_dict = {
+                "plant_id": plant_data_id,
+                "name": name,
+                "scientific_name": scientific_name,
+                "cycle": cycle,
+                "last_watered": last_watered,
+                "recording_time": recording_time,
+                "temperature": temperature,
+                "soil_moisture": soil_moisture,
+                "sunlight_details": sunlight_details,
+                "origin_location": {
+                    "origin_latitude": origin_latitude,
+                    "origin_longitude": origin_longitude,
+                    "origin_country": origin_country
+                },
+                "botanist_details": botanist_details
+            }
+
+            return plant_data_dict
 
 
 def get_all_plants_data(api_path: str) -> list[dict]:
@@ -62,7 +84,8 @@ def get_all_plants_data(api_path: str) -> list[dict]:
     for i in range(51):
         raw_plant_data = get_plant_data_from_api(i, api_path)
         processed_plant_data = process_plant_data_from_api(raw_plant_data)
-        all_plants_data.append(processed_plant_data)
+        if processed_plant_data:
+            all_plants_data.append(processed_plant_data)
 
     return all_plants_data
 

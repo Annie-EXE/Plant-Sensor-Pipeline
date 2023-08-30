@@ -6,89 +6,144 @@ from dotenv import load_dotenv
 from psycopg2 import connect
 from psycopg2.extensions import connection
 
+import pandas as pd
+from pandas import DataFrame
+
 
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
     return connect(user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
+                   dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
 
 
-# TODO Typehint for data?
-def insert_into_plant_table(conn: connection, data) -> None:
-    """Inserts information into plant table"""
-
-    cur = conn.cursor()
-
-    cur.execute("""INSERT INTO plant
-                (plant_name,
-                plant_scientific_name,
-                plant_origin,
-                water_history_id)
-                Values
-                (%s, %s, %s, %s);
-                """([data]))
-
-    cur.commit()
-
-
-def insert_into_plant_origin_table(conn: connection, data) -> None:
+def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
     """Inserts information into plant_origin table"""
 
-    cur = conn.cursor()
+    origin_info = data[['plant_latitude', 'plant_longitude',
+                        'plant_location']].values.tolist()
 
-    cur.execute("""INSERT INTO plant_origin
-                (latitude, longitude, country)
-                Values
-                (%s, %s, %s);
-                """([data]))
+    with conn.cursor() as cur:
 
-    cur.commit()
+        cur.executemany("""INSERT INTO plant_origin
+                    (latitude, longitude, country)
+                    VALUES
+                    (%s, %s, %s)
+                    ON CONFLICT DO NOTHING;
+                    """, origin_info)
+
+    conn.commit()
 
 
-def insert_into_botanist_table(conn: connection, data) -> None:
+def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
+    """Inserts information into plant table"""
+
+    plant_info = data[['plant_id', 'plant_name', 'scientific_name',
+                       'plant_latitude', 'plant_longitude']].values.tolist()
+
+    with conn.cursor() as cur:
+
+        cur.executemany("""INSERT INTO plant
+                    (plant_id,
+                    plant_name,
+                    plant_scientific_name,
+                    plant_origin_id)
+                    VALUES
+                    (%s, %s, %s,
+                        (SELECT plant_origin_id FROM plant_origin 
+                        WHERE latitude = %s and longitude = %s))
+                    ON CONFLICT DO NOTHING;
+                    """, plant_info)
+
+    conn.commit()
+
+
+def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
     """Inserts information into botanist table"""
 
-    cur = conn.cursor()
+    botanist_info = data[['botanist_name', 'botanist_email',
+                          'botanist_phone_number']].values.tolist()
 
-    cur.execute("""INSERT INTO botanist
-                (botanist_name, botanist_email, botanist_phone_number)
-                Values
-                (%s, %s, %s);
-                """([data]))
+    with conn.cursor() as cur:
 
-    cur.commit()
+        cur.executemany("""INSERT INTO botanist
+                    (botanist_name, botanist_email, botanist_phone_number)
+                    VALUES
+                    (%s, %s, %s)
+                    ON CONFLICT DO NOTHING;
+                    """, botanist_info)
+
+    conn.commit()
 
 
-def insert_into_water_history_table(conn: connection, data) -> None:
+def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
     """Inserts information into water_history table"""
 
-    cur = conn.cursor()
+    watering_info = data[['last_watered', 'plant_id']].values.tolist()
 
-    cur.execute("""INSERT INTO water_history
-                (water_history_id, time_watered, plant_id)
-                Values
-                (%s, %s, %s);
-                """([data]))
+    with conn.cursor() as cur:
 
-    cur.commit()
+        cur.executemany("""INSERT INTO water_history
+                    (time_watered, plant_id)
+                    VALUES
+                    (%s, %s)
+                    ON CONFLICT DO NOTHING;
+                    """, watering_info)
+
+    conn.commit()
 
 
-def insert_into_reading_information_table(conn: connection, data) -> None:
+# TODO: grab sunlight id
+def insert_into_reading_information_table(conn: connection, data: DataFrame) -> None:
     """Inserts information into reading_information table"""
 
-    cur = conn.cursor()
+    reading_info = data[['plant_id', 'recording_time', 'botanist_name',
+                         'temperature', 'soil_moisture', 'conditions']].values.tolist()
 
-    cur.execute("""INSERT INTO reading_information
-                (plant_id, plant_reading_time, botanist_id,
-                temperature, soil_moisture, sunlight_id)
-                Values
-                (%s, %s, %s, %s, %s, %s);
-                """([data]))
+    with conn.cursor() as cur:
 
-    cur.commit()
+        cur.executemany("""INSERT INTO reading_information
+                    (plant_id, plant_reading_time, botanist_id,
+                    temperature, soil_moisture, conditions)
+                    VALUES
+                    (%s, %s, 
+                    (SELECT botanist_id FROM botanist WHERE botanist_name = %s),
+                    %s, %s, %s)
+                    ON CONFLICT DO NOTHING;
+                    """, reading_info)
+
+    conn.commit()
+
+
+# def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
+
+#     all_conditions_values = [value.lower() for sublist in data['conditions']
+#                              if sublist is not None for value in sublist]
+    
+#     with conn.cursor() as cur:
+
+#         cur.executemany("""INSERT INTO condition
+#                         (condition_type)
+#                         VALUES (%s)
+#                         ON CONFLICT DO NOTHING;""",
+#                         all_conditions_values)
+
+
+# def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
+
+#     all_conditions_values = [value.lower() for sublist in data['conditions']
+#                              if sublist is not None for value in sublist]
+    
+#     with conn.cursor() as cur:
+
+#         cur.executemany("""INSERT INTO condition
+#                         (condition_type)
+#                         VALUES (%s)
+#                         ON CONFLICT DO NOTHING;""",
+#                         all_conditions_values)
 
 
 if __name__ == "__main__":
@@ -99,10 +154,16 @@ if __name__ == "__main__":
 
     conn = get_db_connection(config)
 
-    cur = conn.cursor()
+    data = pd.read_csv('transformed_plant_data.csv')
 
-    print(cur)
+    insert_into_plant_origin_table(conn, data)
 
-    print(conn)
+    insert_into_plant_table(conn, data)
+
+    insert_into_botanist_table(conn, data)
+
+    insert_into_water_history_table(conn, data)
+
+    insert_into_reading_information_table(conn, data)
 
     conn.close()

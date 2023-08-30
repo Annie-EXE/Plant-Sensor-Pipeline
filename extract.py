@@ -51,27 +51,9 @@ def process_plant_data_from_api(plant_data: dict) -> dict:
             "botanist_details":  plant_data.get("botanist", {})
         }
 
-            botanist_details = plant_data.get("botanist", {}) # dict
-            
-            plant_data_dict = {
-                "plant_id": plant_data_id,
-                "name": name,
-                "scientific_name": scientific_name,
-                "cycle": cycle,
-                "last_watered": last_watered,
-                "recording_time": recording_time,
-                "temperature": temperature,
-                "soil_moisture": soil_moisture,
-                "sunlight_details": sunlight_details,
-                "origin_location": {
-                    "origin_latitude": origin_latitude,
-                    "origin_longitude": origin_longitude,
-                    "origin_country": origin_country
-                },
-                "botanist_details": botanist_details
-            }
+        botanist_details = plant_data.get("botanist", {})  # dict
 
-            return plant_data_dict
+        return plant_data_dict
 
 
 def get_all_plants_data(api_path: str) -> list[dict]:

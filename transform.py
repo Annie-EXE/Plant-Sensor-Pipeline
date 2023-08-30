@@ -38,19 +38,20 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
     flattened_data = []
     for data in loaded_plant_data:
         plant = {}
-        plant["botanist_name"] = data["botanist"]["name"]
-        plant["botanist_email"] = data["botanist"]["email"]
-        plant["botanist_phone_number"] = data["botanist"]["phone"]
-        plant["plant_id"] = data["plant_id"]
-        plant["scientific_name"] = data["scientific_name"]
-        plant["plant_name"] = data["name"]
-        plant["plant_cycle"] = data["cycle"]
-        plant["last_watered"] = data["last_watered"]
-        plant["plant_origin"] = data["origin_location"]
-        plant["recording_taken"] = data["recording_taken"]
-        plant["soil_moisture"] = data["soil_moisture"]
-        plant["conditions"] = data["sunlight"]
-        plant["temperature"] = data["temperature"]
+        plant["botanist_name"] = data.get("botanist_details").get("name")
+        plant["botanist_email"] = data.get("botanist_details").get("email")
+        plant["botanist_phone_number"] = data.get(
+            "botanist_details").get("phone")
+        plant["plant_id"] = data.get("plant_id")
+        plant["scientific_name"] = data.get("scientific_name")
+        plant["plant_name"] = data.get("name")
+        plant["plant_cycle"] = data.get("cycle")
+        plant["last_watered"] = data.get("last_watered")
+        plant["plant_origin"] = data.get("origin_location")
+        plant["recording_time"] = data.get("recording_time")
+        plant["soil_moisture"] = data.get("soil_moisture")
+        plant["conditions"] = data.get("sunlight_details")
+        plant["temperature"] = data.get("temperature")
 
         flattened_data.append(plant)
 
@@ -190,8 +191,8 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
         DataFrame: A pandas DataFrame containing all plant data
     """
 
-    df["recording_taken"] = df.apply(
-        lambda row: get_recording_taken_date_time(row["recording_taken"]), axis=1)
+    df["recording_time"] = df.apply(
+        lambda row: get_recording_taken_date_time(row["recording_time"]), axis=1)
     return df
 
 
@@ -361,7 +362,8 @@ def normalise(text):
 
 
 if __name__ == "__main__":
-    json_file_path = 'mock_transform_data.json'
+
+    json_file_path = "recent_plant_data.json"
 
     loaded_data_from_file = load_data(json_file_path)
 
@@ -369,8 +371,8 @@ if __name__ == "__main__":
 
     plant_df = build_plant_dataframe(flatted_plant_data)
 
-    # text = "Bird of paraDise"
-    # normalised_text = normalise_text(text)
-    # print(normalised_text)
+    # # text = "Bird of paraDise"
+    # # normalised_text = normalise_text(text)
+    # # print(normalised_text)
 
-    print(plant_df)
+    # print(plant_df)

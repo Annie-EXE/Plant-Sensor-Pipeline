@@ -10,10 +10,6 @@ from psycopg2.extensions import connection
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    load_dotenv()
-
-    config = environ()
-
     return connect(dbname=config["DB_NAME"],
                    user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
@@ -98,4 +94,8 @@ def insert_into_reading_information_table(conn: connection, data) -> None:
 
 if __name__ == "__main__":
 
-    get_db_connection()
+    load_dotenv()
+
+    config = environ
+
+    get_db_connection(config)

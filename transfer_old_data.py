@@ -37,7 +37,10 @@ def transfer_botanist_table(conn: connection) -> None:
                     SELECT * FROM botanist AS stb
                     WHERE NOT EXISTS
                     (SELECT * FROM long_term.botanist
-                    WHERE long_term.botanist.botanist_phone_number = stb.botanist_phone_number);""")
+                    WHERE long_term.botanist.botanist_phone_number = botanist.botanist_phone_number
+                    AND long_term.botanist.botanist_name = botanist.botanist_name
+                    AND long_term.botanist.botanist_email = botanist.botanist_name
+                    AND long_term.botanist.botanist_id = botanist.botanist_id);""")
 
     commit_and_close_cursor(conn, cur)
 
@@ -54,7 +57,10 @@ def transfer_plant_table(conn: connection) -> None:
                     SELECT * FROM plant AS stp
                     WHERE NOT EXISTS
                     (SELECT * FROM long_term.plant 
-                     WHERE long_term.plant.plant_name = stp.plant_name);""")
+                    WHERE long_term.plant.plant_name = stp.plant_name
+                    AND long_term.plant.plant_scientific_name = stp.plant_scientific_name
+                    AND long_term.plant.plant_origin_id = stp.plant_origin_id
+                    AND long_term.plant.plant_id = stp.plant_id);""")
 
     cur.commit()
 

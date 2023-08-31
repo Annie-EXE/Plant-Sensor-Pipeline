@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 
 from transform import (
+    check_duplicates,
     get_conditions_sun,
     get_conditions_shade,
     flatten_data,
@@ -23,6 +24,20 @@ def test_get_conditions_shade():
     result = get_conditions_shade(conditions)
     assert isinstance(result, str)
     assert result == "part shade"
+
+
+def test_check_duplicates_true():
+    conditions = ["part sun", "part sun"]
+    result = check_duplicates(conditions)
+    assert isinstance(result, bool)
+    assert result == True
+
+
+def test_check_duplicates_false():
+    conditions = ["part sun", "part shade"]
+    result = check_duplicates(conditions)
+    assert isinstance(result, bool)
+    assert result == False
 
 
 def test_flatten_data_returns_correct_data(mock_nested_data, mock_flattened_data):

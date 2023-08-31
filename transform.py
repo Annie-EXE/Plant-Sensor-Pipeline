@@ -58,7 +58,8 @@ def get_conditions_sun(condition_list: list[str]) -> str:
     sun_conditions = []
 
     for condition in condition_list:
-        nested_conditions = [c for c in condition.split("/") if 'sun' in c]
+        nested_conditions = [
+            c for c in condition.split("/") if 'sun' in c.lower()]
         sun_conditions.extend(nested_conditions)
 
     if sun_conditions:
@@ -86,7 +87,8 @@ def get_conditions_shade(condition_list: list[str]) -> str:
     shade_conditions = []
 
     for condition in condition_list:
-        nested_conditions = [s for s in condition.split("/") if 'shade' in s]
+        nested_conditions = [s for s in condition.split(
+            "/") if 'shade' in s.lower()]
         shade_conditions.extend(nested_conditions)
 
     if shade_conditions:

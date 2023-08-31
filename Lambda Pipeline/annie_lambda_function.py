@@ -11,36 +11,12 @@ from psycopg2 import connect
 from psycopg2.extensions import connection
 
 from extract import (
-    get_plant_data_from_api,
-    process_plant_data_from_api,
     get_all_plants_data,
     clean_unicode_from_plant_data,
-    create_json_file
 )
 
 from transform import (
-    load_data,
-    check_duplicates,
-    get_conditions_sun,
-    get_conditions_shade,
     flatten_data,
-    transform_email_column_using_regex,
-    normalize_phone_number,
-    transform_phone_column_using_regex,
-    get_scientific_name,
-    transform_scientific_name_column,
-    get_last_watered_date_time,
-    transform_last_watered_column,
-    get_recording_taken_date_time,
-    transform_recording_taken_column,
-    get_latitude,
-    get_longitude,
-    get_location,
-    build_location_columns,
-    get_valid_temperature,
-    transform_temperature_column,
-    normalize_text_in_list,
-    normalize_column_text,
     build_plant_dataframe
 )
 
@@ -98,5 +74,6 @@ def lambda_handler(event, context) -> dict:
         'statusCode': 200,
         'body': 'Data uploaded to database successfully'
     }
+
 
 lambda_handler(None, None)

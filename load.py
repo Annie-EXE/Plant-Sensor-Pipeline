@@ -13,10 +13,11 @@ from pandas import DataFrame
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
 
-    return connect(dbname=config["DB_NAME"],
+    return connect(dbname='practice',
+                #    dbname=config["DB_NAME"],
                    user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
-                   dbname=config["DB_NAME"],
+                #    dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
 
@@ -97,7 +98,6 @@ def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
     conn.commit()
 
 
-# TODO: grab sunlight id
 def insert_into_reading_information_table(conn: connection, data: DataFrame) -> None:
     """Inserts information into reading_information table"""
 
@@ -107,6 +107,8 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 
     with conn.cursor() as cur:
 
+        print(reading_info)
+
         cur.executemany("""INSERT INTO reading_information
                     (plant_id, plant_reading_time, botanist_id,
                     temperature, soil_moisture, 
@@ -114,41 +116,13 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
                     VALUES
                     (%s, %s, 
                     (SELECT botanist_id FROM botanist WHERE botanist_name = %s),
-                    %s, 
-                    (SELECT sun_condition_id FROM sun_condition WHERE sun_condition = %s), 
-                    (SELECT shade_condition_id FROM shade_condition WHERE shade_condition = %s))
+                    %s, %s,
+                    (SELECT sun_condition_id FROM sun_condition WHERE sun_condition_type = %s), 
+                    (SELECT shade_condition_id FROM shade_condition WHERE shade_condition_type = %s))
                     ON CONFLICT DO NOTHING;
                     """, reading_info)
 
     conn.commit()
-
-
-def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
-
-    shade_conditions_values = [value.lower() for sublist in data['shade_condition']
-                             if sublist is not None for value in sublist]
-    
-    with conn.cursor() as cur:
-
-        cur.executemany("""INSERT INTO shade_condition
-                        (shade_condition_id)
-                        VALUES (%s)
-                        ON CONFLICT DO NOTHING;""",
-                        shade_conditions_values)
-
-
-def insert_into_sun_condition_table(conn: connection, data: DataFrame) -> None:
-
-    sun_conditions_values = [value.lower() for sublist in data['sun_condition']
-                             if sublist is not None for value in sublist]
-    
-    with conn.cursor() as cur:
-
-        cur.executemany("""INSERT INTO sun_condition
-                        (sun_condition_id)
-                        VALUES (%s)
-                        ON CONFLICT DO NOTHING;""",
-                        sun_conditions_values)
 
 
 if __name__ == "__main__":

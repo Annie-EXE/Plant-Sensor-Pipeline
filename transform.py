@@ -480,6 +480,7 @@ if __name__ == "__main__":
 
     plant_df = plant_df.dropna(subset=['last_watered', 'recording_time'])
 
+    print(plant_df[['plant_name', 'shade_condition', 'sun_condition']])
+
     plant_df.to_csv('transformed_plant_data.csv')
 
-    print(plant_df)

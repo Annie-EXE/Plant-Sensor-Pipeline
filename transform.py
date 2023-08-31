@@ -26,6 +26,79 @@ def load_data(json_path: str) -> list[dict]:
         return None
 
 
+def check_duplicates(data: list[str]) -> bool:
+    """
+    Check through elements within a list and returns a bool to indicate
+    whether all elements in the list are the same
+
+    Args:
+        data (list[str]): A list containing strings
+
+    Returns:
+        bool: True is all elements are the same else False
+    """
+    check_element = data[0]
+    return all(element.lower() == check_element.lower() for element in data)
+
+
+def get_conditions_sun(condition_list: list[str]) -> str:
+    """
+    Extract conditions related to the state of the sun for each plant
+
+    Args:
+        conditions (list[str]): A list of conditions related to the state
+        of the sun and shade
+
+    Returns:
+        str: A string relating to the state of the sun
+    """
+    if not isinstance(condition_list, list):
+        return "No Information"
+
+    sun_conditions = []
+
+    for condition in condition_list:
+        nested_conditions = [
+            c for c in condition.split("/") if 'sun' in c.lower()]
+        sun_conditions.extend(nested_conditions)
+
+    if sun_conditions:
+        if len(sun_conditions) == 1:
+            return sun_conditions[0]
+        if check_duplicates(sun_conditions):
+            return sun_conditions[0]
+    return "No Information"
+
+
+def get_conditions_shade(condition_list: list[str]) -> str:
+    """
+    Extract conditions related to the state of the shade for each plant
+
+    Args:
+        conditions (list[str]): A list of conditions related to the state
+        of the sun and shade
+
+    Returns:
+        str: A string relating to the state of the shade
+    """
+    if not isinstance(condition_list, list):
+        return "No Information"
+
+    shade_conditions = []
+
+    for condition in condition_list:
+        nested_conditions = [s for s in condition.split(
+            "/") if 'shade' in s.lower()]
+        shade_conditions.extend(nested_conditions)
+
+    if shade_conditions:
+        if len(shade_conditions) == 1:
+            return shade_conditions[0]
+        if check_duplicates(shade_conditions):
+            return shade_conditions[0]
+    return "No Information"
+
+
 def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
     """
     Build a flattened dictionary from extracted a Python list of dictionaries containing the parsed JSON data.
@@ -51,7 +124,10 @@ def flatten_data(loaded_plant_data: list[dict]) -> list[dict]:
         plant["plant_origin"] = data.get("origin_location")
         plant["recording_time"] = data.get("recording_time")
         plant["soil_moisture"] = data.get("soil_moisture")
-        plant["conditions"] = data.get("sunlight_details")
+        plant["sun_condition"] = get_conditions_sun(
+            data.get("sunlight_details"))
+        plant["shade_condition"] = get_conditions_shade(
+            data.get("sunlight_details"))
         plant["temperature"] = data.get("temperature")
 
         flattened_data.append(plant)
@@ -360,8 +436,10 @@ def normalize_column_text(df: DataFrame) -> DataFrame:
         lambda x: x.lower() if type(x) == str else x)
     df["scientific_name"] = df["scientific_name"].apply(
         lambda x: x.lower() if type(x) == str else x)
-    df["conditions"] = df.apply(
-        lambda row: normalize_text_in_list(row["conditions"]), axis=1)
+    df["sun_condition"] = df["sun_condition"].apply(
+        lambda x: x.lower() if type(x) == str else x)
+    df["shade_condition"] = df["shade_condition"].apply(
+        lambda x: x.lower() if type(x) == str else x)
     return df
 
 
@@ -398,12 +476,7 @@ if __name__ == "__main__":
 
     flatted_plant_data = flatten_data(loaded_data_from_file)
 
-    # for entry in flatted_plant_data:
-    #     print(entry["botanist_phone_number"])
-
     plant_df = build_plant_dataframe(flatted_plant_data)
-
-    print(type(plant_df['conditions'].iloc[0]))
 
     plant_df = plant_df.dropna(subset=['last_watered', 'recording_time'])
 

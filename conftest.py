@@ -15,7 +15,7 @@ def mock_api_data():
         "recording_taken": "2023-01-01 00:00:00",
         "scientific_name": ["Mock Scientific Name"],
         "soil_moisture": 0,
-        "sunlight": ["Mock detail", "Mock detail"],
+        "sunlight": ["Mock Sun detail", "Mock Shade detail"],
         "temperature": 0,
     }
     return data
@@ -35,8 +35,8 @@ def mock_nested_data():
         "temperature": 0,
         "soil_moisture": 0,
         "sunlight_details": [
-            "Mock detail",
-            "Mock detail"
+            "Mock Sun detail",
+            "Mock Shade detail"
         ],
         "origin_location": {
             "origin_latitude": "0.000",
@@ -73,7 +73,8 @@ def mock_flattened_data():
             },
             'recording_time': "2023-01-01 00:00:00",
             'soil_moisture': 0,
-            'conditions': ["Mock detail", "Mock detail"],
+            'sun_condition': "Mock Sun detail",
+            'shade_condition': "Mock Shade detail",
             'temperature': 0
         }
     ]

@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from psycopg2 import connect
 from psycopg2.extensions import connection
 
+from datetime import datetime, timedelta
+
 import pandas as pd
 from pandas import DataFrame
 
@@ -179,6 +181,18 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
                     (SELECT shade_condition_id FROM shade_condition WHERE shade_condition_type = %s))
                     ON CONFLICT DO NOTHING;
                     """, reading_info)
+
+    conn.commit()
+
+
+def delete_old_rows(conn: connection):
+    """Deletes rows if the timestamp is more than 24hrs prior"""
+
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
+        cur.execute("DELETE FROM water_history WHERE time_watered < %s", (twenty_four_hours_ago,))
 
     conn.commit()
 

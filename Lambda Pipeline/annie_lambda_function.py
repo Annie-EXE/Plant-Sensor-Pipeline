@@ -2,7 +2,7 @@ import json
 from os import environ
 from dotenv import load_dotenv
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from pandas import DataFrame
 import numpy as np
@@ -50,7 +50,8 @@ from load import (
     insert_into_plant_table,
     insert_into_botanist_table,
     insert_into_water_history_table,
-    insert_into_reading_information_table
+    insert_into_reading_information_table,
+    delete_old_rows
 )
 
 
@@ -89,9 +90,13 @@ def lambda_handler(event, context) -> dict:
 
     insert_into_reading_information_table(conn, plant_df)
 
+    delete_old_rows(conn)
+
     conn.close()
 
     return {
         'statusCode': 200,
         'body': 'Data uploaded to database successfully'
     }
+
+lambda_handler(None, None)

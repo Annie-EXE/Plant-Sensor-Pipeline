@@ -6,12 +6,14 @@ CREATE DATABASE plants;
 
 CREATE TABLE IF NOT EXISTS sun_condition (
    sun_condition_id INT GENERATED ALWAYS AS IDENTITY,
-   sun_condition_type TEXT NOT NULL UNIQUE
+   sun_condition_type TEXT NOT NULL UNIQUE,
+   PRIMARY KEY (sun_condition_id)
 );
 
 CREATE TABLE IF NOT EXISTS shade_condition (
    shade_condition_id INT GENERATED ALWAYS AS IDENTITY,
-   shade_condition_type TEXT NOT NULL UNIQUE
+   shade_condition_type TEXT NOT NULL UNIQUE,
+   PRIMARY KEY (shade_condition_id)
 );
 
 CREATE TABLE IF NOT EXISTS plant_origin (
@@ -72,12 +74,14 @@ CREATE SCHEMA long_term;
 
 CREATE TABLE IF NOT EXISTS long_term.sun_condition (
    sun_condition_id INT GENERATED ALWAYS AS IDENTITY,
-   sun_condition_type TEXT NOT NULL UNIQUE
+   sun_condition_type TEXT NOT NULL UNIQUE,
+   PRIMARY KEY (sun_condition_id)
 );
 
 CREATE TABLE IF NOT EXISTS long_term.shade_condition (
    shade_condition_id INT GENERATED ALWAYS AS IDENTITY,
    shade_condition_type TEXT NOT NULL UNIQUE
+   PRIMARY KEY (shade_condition_id)
 );
 
 CREATE TABLE IF NOT EXISTS long_term.plant_origin (
@@ -127,7 +131,5 @@ CREATE TABLE IF NOT EXISTS long_term.reading_information (
     PRIMARY KEY (reading_information_id),
     FOREIGN KEY (plant_id) REFERENCES plant(plant_id),
     FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id),
-    FOREIGN KEY (sun_condition_id) REFERENCES sun_condition(sun_condition_id),
-    FOREIGN KEY (shade_condition_id) REFERENCES shade_condition(shade_condition_id),
     CONSTRAINT unique_plant_reading_time UNIQUE (plant_id, plant_reading_time)
 );

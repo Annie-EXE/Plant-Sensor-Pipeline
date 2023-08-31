@@ -4,7 +4,8 @@ import pandas as pd
 
 from transform import (
     flatten_data,
-    transform_email_column_using_regex
+    transform_email_column_using_regex,
+    transform_phone_column_using_regex
 )
 
 
@@ -24,6 +25,7 @@ def test_flatten_data_returns_correct_data(mock_nested_data, mock_flattened_data
 
 
 def test_transform_email_column_using_regex():
+    """"""
     mock_email_data = {
         "botanist_email": [
             "mockOne@example.com",
@@ -44,5 +46,30 @@ def test_transform_email_column_using_regex():
 
     assert result_df["botanist_email"].tolist() == expected_result
 
-def test_normalize_phone_number():
-    pass
+
+# def test_transform_phone_column_using_regex():
+#     """"""
+#     mock_phone_data = [{"botanist_phone_number": "001.251-701-7428x7358", },
+#                        {
+#         "botanist_phone_number": [
+#             "001.251-701-7428x7358",
+#             "001-197/304-0701x96926",
+#             "531)160(8892x4734",
+#             "9766126198",
+#             "+1-233-531-2626x72126"
+#         ]
+#     }
+#     ]
+
+#     mock_database = pd.DataFrame(mock_phone_data)
+#     result_df = transform_phone_column_using_regex(mock_phone_data)
+
+#     expected_result = [
+#         "251-701-7428",
+#         "197-304-0701",
+#         "531-160-8892",
+#         "976-612-6198",
+#         "233-531-2626"
+#     ]
+
+#     assert result_df["botanist_phone_number"].tolist() == expected_result

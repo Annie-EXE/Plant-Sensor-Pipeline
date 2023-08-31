@@ -123,6 +123,11 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
     conn.commit()
 
 
+def delete_old_rows(conn):
+
+    
+
+
 if __name__ == "__main__":
 
     load_dotenv()

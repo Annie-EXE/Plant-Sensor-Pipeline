@@ -1,6 +1,6 @@
 """File that handles loading data into the postgres database"""
 
-from os import environ
+from os import environ, _Environ
 
 from dotenv import load_dotenv
 from psycopg2 import connect
@@ -9,21 +9,39 @@ from psycopg2.extensions import connection
 import pandas as pd
 from pandas import DataFrame
 
-from datetime import datetime, timedelta
 
+def get_db_connection(config: _Environ) -> connection:
+    """
+    Returns connection to the database
 
-def get_db_connection(config: dict) -> connection:
-    """Returns connection to the database"""
+    Args:
+        config (_Environ): A file containing sensitive values
 
-    return connect(dbname=config["DB_NAME"],
+    Returns:
+        connection: A connection to a Postgres database
+    """
+
+    return connect(dbname='practice',
+                   #    dbname=config["DB_NAME"],
                    user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
+                   #    dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
 
 
 def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into plant_origin table"""
+    """
+    Inserts information into plant_origin table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     origin_info = data[['plant_latitude', 'plant_longitude',
                         'plant_location']].values.tolist()
@@ -41,7 +59,17 @@ def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into plant table"""
+    """
+    Inserts information into plant table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     plant_info = data[['plant_id', 'plant_name', 'scientific_name',
                        'plant_latitude', 'plant_longitude']].values.tolist()
@@ -64,7 +92,17 @@ def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into botanist table"""
+    """
+    Inserts information into botanist table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     botanist_info = data[['botanist_name', 'botanist_email',
                           'botanist_phone_number']].values.tolist()
@@ -82,7 +120,17 @@ def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into water_history table"""
+    """
+    Inserts information into water_history table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     watering_info = data[['last_watered', 'plant_id']].values.tolist()
 
@@ -99,7 +147,17 @@ def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_reading_information_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into reading_information table"""
+    """
+    Inserts information into reading_information table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     reading_info = data[['plant_id', 'recording_time', 'botanist_name',
                          'temperature', 'soil_moisture', 'sun_condition',
@@ -123,18 +181,6 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
                     """, reading_info)
 
     conn.commit()
-
-
-def delete_old_rows(conn: connection):
-    """Deletes rows if the timestamp is more than 24hrs prior"""
-
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-
-    with conn.cursor() as cur:
-        cur.execute("DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
-        cur.execute("DELETE FROM water_history WHERE time_watered < %s", (twenty_four_hours_ago,))
-
-    connection.commit()
 
 
 if __name__ == "__main__":

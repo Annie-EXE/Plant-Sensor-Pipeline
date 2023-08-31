@@ -1,6 +1,6 @@
 """File that handles loading data into the postgres database"""
 
-from os import environ
+from os import environ, _Environ
 
 from dotenv import load_dotenv
 from psycopg2 import connect
@@ -10,8 +10,16 @@ import pandas as pd
 from pandas import DataFrame
 
 
-def get_db_connection(config: dict) -> connection:
-    """Returns connection to the database"""
+def get_db_connection(config: _Environ) -> connection:
+    """
+    Returns connection to the database
+
+    Args:
+        config (_Environ): A file containing sensitive values
+
+    Returns:
+        connection: A connection to a Postgres database
+    """
 
     return connect(dbname='practice',
                    #    dbname=config["DB_NAME"],
@@ -23,7 +31,17 @@ def get_db_connection(config: dict) -> connection:
 
 
 def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into plant_origin table"""
+    """
+    Inserts information into plant_origin table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     origin_info = data[['plant_latitude', 'plant_longitude',
                         'plant_location']].values.tolist()
@@ -41,7 +59,17 @@ def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into plant table"""
+    """
+    Inserts information into plant table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     plant_info = data[['plant_id', 'plant_name', 'scientific_name',
                        'plant_latitude', 'plant_longitude']].values.tolist()
@@ -64,7 +92,17 @@ def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into botanist table"""
+    """
+    Inserts information into botanist table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     botanist_info = data[['botanist_name', 'botanist_email',
                           'botanist_phone_number']].values.tolist()
@@ -82,7 +120,17 @@ def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into water_history table"""
+    """
+    Inserts information into water_history table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     watering_info = data[['last_watered', 'plant_id']].values.tolist()
 
@@ -99,7 +147,17 @@ def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
 
 
 def insert_into_reading_information_table(conn: connection, data: DataFrame) -> None:
-    """Inserts information into reading_information table"""
+    """
+    Inserts information into reading_information table
+
+    Args:
+        conn (connection): A connection to a Postgres database
+
+        data (DataFrame): A DataFrame containing transformed data for all plants
+
+    Returns:
+        None
+    """
 
     reading_info = data[['plant_id', 'recording_time', 'botanist_name',
                          'temperature', 'soil_moisture', 'sun_condition',

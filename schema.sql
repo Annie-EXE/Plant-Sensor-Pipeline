@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS shade_condition (
 
 CREATE TABLE IF NOT EXISTS plant_origin (
     plant_origin_id INT GENERATED ALWAYS AS IDENTITY,
-    latitude DECIMAL,
-    longitude DECIMAL,
+    latitude DECIMAL NOT NULL,
+    longitude DECIMAL NOT NULL,
     country TEXT,
     PRIMARY KEY (plant_origin_id),
     CONSTRAINT unique_latitude_longitude UNIQUE (latitude, longitude)
@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS plant_origin (
 CREATE TABLE IF NOT EXISTS botanist (
     botanist_id INT GENERATED ALWAYS AS IDENTITY,
     botanist_name TEXT NOT NULL UNIQUE,
-    botanist_email TEXT,
-    botanist_phone_number TEXT,
+    botanist_email TEXT NOT NULL UNIQUE,
+    botanist_phone_number TEXT NOT NULL UNIQUE,
     PRIMARY KEY (botanist_id)
 );
 

@@ -105,9 +105,14 @@ if __name__ == "__main__":
 
     water_df = get_df_from_sql(conn, 'water_history')
     reading_df = get_df_from_sql(conn, 'reading_information')
+    plants_df = get_df_from_sql(conn, 'plant')
+    reading_df = pd.merge(reading_df, plants_df[['plant_id', 'plant_name']], on='plant_id', how='left')
+    print(reading_df[['plant_id','plant_name']])
 
     bar_chart_to_show_water_frequency(water_df)
     print(reading_df['soil_moisture'])
 
     plot_average_temperatures(reading_df)
     plot_average_soil_moisture(reading_df)
+
+    print(plants_df)

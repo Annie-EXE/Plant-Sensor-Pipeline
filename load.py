@@ -118,32 +118,32 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
     conn.commit()
 
 
-# def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
+def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
 
-#     all_conditions_values = [value.lower() for sublist in data['conditions']
-#                              if sublist is not None for value in sublist]
+    all_conditions_values = [value.lower() for sublist in data['shade_condition']
+                             if sublist is not None for value in sublist]
     
-#     with conn.cursor() as cur:
+    with conn.cursor() as cur:
 
-#         cur.executemany("""INSERT INTO condition
-#                         (condition_type)
-#                         VALUES (%s)
-#                         ON CONFLICT DO NOTHING;""",
-#                         all_conditions_values)
+        cur.executemany("""INSERT INTO condition
+                        (condition_type)
+                        VALUES (%s)
+                        ON CONFLICT DO NOTHING;""",
+                        all_conditions_values)
 
 
-# def insert_into_shade_condition_table(conn: connection, data: DataFrame) -> None:
+def insert_into_sun_condition_table(conn: connection, data: DataFrame) -> None:
 
-#     all_conditions_values = [value.lower() for sublist in data['conditions']
-#                              if sublist is not None for value in sublist]
+    all_conditions_values = [value.lower() for sublist in data['sun_condition']
+                             if sublist is not None for value in sublist]
     
-#     with conn.cursor() as cur:
+    with conn.cursor() as cur:
 
-#         cur.executemany("""INSERT INTO condition
-#                         (condition_type)
-#                         VALUES (%s)
-#                         ON CONFLICT DO NOTHING;""",
-#                         all_conditions_values)
+        cur.executemany("""INSERT INTO condition
+                        (condition_type)
+                        VALUES (%s)
+                        ON CONFLICT DO NOTHING;""",
+                        all_conditions_values)
 
 
 if __name__ == "__main__":

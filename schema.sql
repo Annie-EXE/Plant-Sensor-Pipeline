@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS long_term.plant_origin (
 );
 
 CREATE TABLE IF NOT EXISTS long_term.botanist (
-    botanist_id INT GENERATED ALWAYS AS IDENTITY,
+    botanist_id INT UNIQUE,
     botanist_name TEXT NOT NULL UNIQUE,
     botanist_email TEXT,
     botanist_phone_number TEXT,

@@ -10,6 +10,7 @@ import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import connection
 
+
 def dashboard_header(header_title: str, sub_title: str = None) -> None:
     """Displays the dashboard header"""
     st.markdown(f"## {header_title.title()}")
@@ -24,18 +25,62 @@ def create_chart_title(chart_title: str) -> None:
     st.markdown(f"### {chart_title.title()}")
 
 
-def get_water_df_from_sql(conn: connection) -> DataFrame:
+def get_df_from_sql(conn: connection, table_name: str) -> DataFrame:
     """Returns df from SQL query"""
     with conn.cursor() as cur:
-        cur.execute("SELECT * FROM water_history")
-        water_data = cur.fetchall()
+        cur.execute(f"SELECT * FROM {table_name}")
+        data = cur.fetchall()
         column_names = [desc[0] for desc in cur.description]
-        water_df = pd.DataFrame(water_data, columns=column_names)
+        df = pd.DataFrame(data, columns=column_names)
 
 
     conn.commit()
 
-    return water_df
+    return df
+
+
+def bar_chart_to_show_water_frequency(water_df: DataFrame):
+    """Makes a bar chart that shows how often
+    each plant has been watered"""
+
+    counts = water_df['plant_id'].value_counts()
+
+    plt.figure(figsize=(60, 30))
+    plt.bar(counts.index, counts.values, width=0.5, color='#44d4eb')
+    plt.xticks(counts.index, counts.index, rotation=90, fontsize=50)
+    plt.xlabel("\nPlant ID", fontsize=100)
+    plt.ylabel("Times Watered", fontsize=100)
+    plt.title("Watering Frequency\n", fontsize=200)
+
+    st.pyplot(plt)
+
+
+def plot_average_temperatures(reading_df: DataFrame):
+    """Plots the average temperature of each plant"""
+
+    average_temperatures = reading_df.groupby('plant_id')['temperature'].mean()
+
+    plt.bar(average_temperatures.index, average_temperatures.values, color='#fa9196')
+
+    plt.xlabel('\nPlant ID')
+    plt.ylabel('Average Temperature')
+    plt.title('\nAverage Temperature for Each Plant ID\n', fontsize=200)
+
+    st.pyplot(plt)
+
+
+def plot_average_soil_moisture(reading_df: DataFrame):
+    """Plots the average soil moisture for each plant"""
+
+    avg_soil_moisture = reading_df.groupby('plant_id')['soil_moisture'].mean()
+
+    plt.bar(avg_soil_moisture.index, avg_soil_moisture.values, color='#7d4807')
+
+    plt.xlabel('\nPlant ID')
+    plt.ylabel('Average Soil Moisture')
+    plt.title('\nAverage Soil Moisture for Each Plant ID\n', fontsize=200)
+
+    st.pyplot(plt)
 
 
 if __name__ == "__main__":
@@ -58,5 +103,11 @@ if __name__ == "__main__":
 
     # dashboard_header('plants', 'p l a n t s')
 
-    print(get_water_df_from_sql(conn))
+    water_df = get_df_from_sql(conn, 'water_history')
+    reading_df = get_df_from_sql(conn, 'reading_information')
 
+    bar_chart_to_show_water_frequency(water_df)
+    print(reading_df['soil_moisture'])
+
+    plot_average_temperatures(reading_df)
+    plot_average_soil_moisture(reading_df)

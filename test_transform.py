@@ -1,9 +1,8 @@
 """Test Script: Testing functions from transform.py"""
+
 from datetime import datetime
-import numpy as np
 import pandas as pd
 import pytest
-from unittest.mock import MagicMock, patch
 
 from transform import (
     check_duplicates,

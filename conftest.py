@@ -2,6 +2,8 @@
 import pytest
 import pandas as pd
 
+from transform import build_plant_dataframe
+
 
 @pytest.fixture
 def mock_api_data():
@@ -83,5 +85,9 @@ def mock_flattened_data():
 
 @pytest.fixture
 def mock_database(mock_flattened_data):
-    data = mock_flattened_data
-    return pd.DataFrame(data)
+    return pd.DataFrame(mock_flattened_data)
+
+
+@pytest.fixture
+def mock_transformed_database(mock_flattened_data):
+    return build_plant_dataframe(mock_flattened_data)

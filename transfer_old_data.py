@@ -4,7 +4,7 @@ from os import environ
 
 from dotenv import load_dotenv
 from psycopg2 import connect
-from psycopg2.extensions import connection
+from psycopg2.extensions import connection, cursor
 
 
 def get_db_connection_lt(config: dict) -> connection:
@@ -17,7 +17,14 @@ def get_db_connection_lt(config: dict) -> connection:
                    port=config["DB_PORT"])
 
 
-# TODO Delete data or not??
+def commit_and_close_cursor(conn: connection, cur: cursor) -> None:
+    """Commits changes and closes cursor"""
+
+    conn.commit()
+
+    cur.close()
+
+
 def transfer_botanist_table(conn: connection) -> None:
     """
     Transfers data in botanist from short_term to long_term schema
@@ -32,10 +39,9 @@ def transfer_botanist_table(conn: connection) -> None:
                     (SELECT * FROM long_term.botanist
                     WHERE long_term.botanist.botanist_phone_number = stb.botanist_phone_number);""")
 
-    cur.commit()
+    commit_and_close_cursor(conn, cur)
 
 
-# TODO Delete data or not??
 def transfer_plant_table(conn: connection) -> None:
     """
     Transfers data in plant from the short_term schema to the long_term schema
@@ -53,7 +59,6 @@ def transfer_plant_table(conn: connection) -> None:
     cur.commit()
 
 
-# TODO Select and delete data in the past hour
 def transfer_water_history_table(conn: connection) -> None:
     """
     Transfers data in water_history from the short_term schema to the long_term schema
@@ -68,10 +73,9 @@ def transfer_water_history_table(conn: connection) -> None:
                     (SELECT time_watered, plant_id FROM long_term.water_history 
                      WHERE long_term.water_history.time_watered = water_history.time_watered);""")
 
-    cur.commit()
+    commit_and_close_cursor(conn, cur)
 
 
-# TODO Select and delete data in the past hour??
 def transfer_reading_information_table(conn: connection) -> None:
     """
     Transfers data in reading_information from short_term to long_term schema
@@ -89,12 +93,33 @@ def transfer_reading_information_table(conn: connection) -> None:
                     FROM long_term.reading_information 
                     WHERE long_term.reading_information.plant_reading_time = reading_information.plant_reading_time);""")
 
-    data = cur.fetchall()
-
-    print(data)
+    commit_and_close_cursor(conn, cur)
 
 
-# TODO Delete data or not?
+def delete_data_from_over_24_hours_reading_information_table(conn: connection) -> None:
+    """Deletes all data from reading_information that is older than 24 hours"""
+
+    cur = conn.cursor()
+
+    cur.execute("""DELETE from reading_information
+                WHERE 
+                plant_reading_time < now() - interval '24 hours';""")
+
+    commit_and_close_cursor(conn, cur)
+
+
+def delete_data_from_over_24_hours_water_history_table(conn: connection) -> None:
+    """Deletes all data from water_history that is older than 24 hours"""
+
+    cur = conn.cursor()
+
+    cur.execute("""DELETE from water_history
+                WHERE 
+                time_watered < now() - interval '24 hours';""")
+
+    commit_and_close_cursor(conn, cur)
+
+
 def transfer_shade_condition_table(conn: connection) -> None:
     """
     Transfers data in shade_condition from short_term to long_term schema
@@ -112,12 +137,9 @@ def transfer_shade_condition_table(conn: connection) -> None:
                     FROM long_term.shade_condition 
                     WHERE long_term.shade_condition.shade_condition_type = shade_condition.shade_condition_type);""")
 
-    data = cur.fetchall()
-
-    print(data)
+    commit_and_close_cursor(conn, cur)
 
 
-# TODO Delete data or not?
 def transfer_sun_condition_table(conn: connection) -> None:
     """
     Transfers data in sun_condition from short_term to long_term schema
@@ -140,7 +162,6 @@ def transfer_sun_condition_table(conn: connection) -> None:
     print(data)
 
 
-# TODO Delete data or not?
 def transfer_plant_origin_table(conn: connection) -> None:
     """
     Transfers data in plant_origin from short_term to long_term schema
@@ -160,19 +181,9 @@ def transfer_plant_origin_table(conn: connection) -> None:
                     AND long_term.plant_origin.longitude = plant_origin.longitude
                     AND long_term.plant_origin.country = plant_origin.country);""")
 
-    data = cur.fetchall()
-
-    print(data)
+    commit_and_close_cursor(conn, cur)
 
 
 if __name__ == "__main__":
 
-    load_dotenv()
-
-    config = environ
-
-    conn = get_db_connection_lt(config)
-
-    # merge_readings_table(conn)
-
-    conn.close()
+    pass

@@ -28,6 +28,12 @@ def get_plant_data_from_api(plant_id: int, api_path: str) -> dict:
 def process_plant_data_from_api(plant_data: dict) -> dict:
     """
     Process API data and extract relevant information into a new dict
+
+    Args:
+        plant_data (dict): Raw JSON response data from the API 
+
+    Results: 
+        dict: A python dictionary containing relevant data from the API
     """
     if 'error' not in plant_data:
 
@@ -51,15 +57,18 @@ def process_plant_data_from_api(plant_data: dict) -> dict:
             "botanist_details":  plant_data.get("botanist", {})
         }
 
-        botanist_details = plant_data.get("botanist", {})  # dict
-
         return plant_data_dict
 
 
 def get_all_plants_data(api_path: str) -> list[dict]:
     """
-    Extracts the data for all 50
-    plants, into a list of dicts
+    Extracts the data for all plants, into a list of dicts
+
+    Args:
+        api_path (str): A string containing the api path
+
+    Returns:
+        list[dict]: A Python list containing all data from API for each plant
     """
     all_plants_data = []
 
@@ -96,8 +105,16 @@ def clean_unicode_from_plant_data(plants_data: list[dict]) -> list[dict]:
 
 def create_json_file(data: list[dict], file_path: str) -> str:
     """
-    Creates a .json file and 
-    uploads data to it
+    Creates a .json file and uploads data to it
+
+    Args:
+        data (list[dict]): A list containing dictionaries of processed plant data
+        with unicode removed from `name` data
+
+        file_path (str): A string assigned as a file name
+
+    Results:
+        str: A string to show successful writing of data
     """
     with open(file_path, "w") as json_file:
         json.dump(data, json_file, indent=4)

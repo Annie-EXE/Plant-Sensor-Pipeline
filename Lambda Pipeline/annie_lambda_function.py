@@ -1,14 +1,6 @@
 import json
 from os import environ
 from dotenv import load_dotenv
-import requests
-from datetime import datetime, timedelta
-import pandas as pd
-from pandas import DataFrame
-import numpy as np
-import re
-from psycopg2 import connect
-from psycopg2.extensions import connection
 
 from extract import (
     get_all_plants_data,

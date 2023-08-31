@@ -258,7 +258,7 @@ def transform_last_watered_column(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_recording_taken_date_time(datetime_string: str) -> datetime | None:
+def get_recording_taken_date_time(datetime_string: str) -> datetime:
     """
     Convert date string from "recording_taken" column to a datetime object
 
@@ -290,7 +290,7 @@ def transform_recording_taken_column(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_latitude(origin_string: list[str]) -> float | None:
+def get_latitude(origin_string: list[str]) -> float:
     """
     Return information related to the latitude of the plant
 
@@ -309,7 +309,7 @@ def get_latitude(origin_string: list[str]) -> float | None:
         return None
 
 
-def get_longitude(origin_string: list[str]) -> float | None:
+def get_longitude(origin_string: list[str]) -> float:
     """
     Return information related to the longitude of the plant
 
@@ -328,7 +328,7 @@ def get_longitude(origin_string: list[str]) -> float | None:
         return None
 
 
-def get_location(origin_string: list[str]) -> str | None:
+def get_location(origin_string: list[str]) -> str:
     """
     Return information related to the location of the plant
 
@@ -371,7 +371,7 @@ def build_location_columns(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_valid_temperature(temperature_data: float) -> float | str:
+def get_valid_temperature(temperature_data: float) -> float:
     """
     Return temperature value if it meets the following criteria: -40 < temperature_data < 75
     Else return None

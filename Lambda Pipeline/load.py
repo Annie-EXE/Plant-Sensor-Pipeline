@@ -9,6 +9,8 @@ from psycopg2.extensions import connection
 import pandas as pd
 from pandas import DataFrame
 
+from datetime import datetime, timedelta
+
 
 def get_db_connection(config: dict) -> connection:
     """Returns connection to the database"""
@@ -123,9 +125,16 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
     conn.commit()
 
 
-def delete_old_rows(conn):
+def delete_old_rows(conn: connection):
+    """Deletes rows if the timestamp is more than 24hrs prior"""
 
-    
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
+        cur.execute("DELETE FROM water_history WHERE time_watered < %s", (twenty_four_hours_ago,))
+
+    connection.commit()
 
 
 if __name__ == "__main__":

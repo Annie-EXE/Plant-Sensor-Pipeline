@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS long_term.sun_condition (
 
 CREATE TABLE IF NOT EXISTS long_term.shade_condition (
    shade_condition_id INT GENERATED ALWAYS AS IDENTITY,
-   shade_condition_type TEXT NOT NULL UNIQUE
+   shade_condition_type TEXT NOT NULL UNIQUE,
    PRIMARY KEY (shade_condition_id)
 );
 

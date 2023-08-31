@@ -160,9 +160,10 @@ cython_debug/
 #.idea/
 
 .env
-recent_plant_data.json
+*.json
+*.csv
 terraform/*.tfvars
 terraform
 venv/
 .vscode/
-mock_transform_data.json
+

@@ -131,5 +131,7 @@ CREATE TABLE IF NOT EXISTS long_term.reading_information (
     PRIMARY KEY (reading_information_id),
     FOREIGN KEY (plant_id) REFERENCES plant(plant_id),
     FOREIGN KEY (botanist_id) REFERENCES botanist(botanist_id),
+    FOREIGN KEY (sun_condition_id) REFERENCES sun_condition(sun_condition_id),
+    FOREIGN KEY (shade_condition_id) REFERENCES shade_condition(shade_condition_id),
     CONSTRAINT unique_plant_reading_time UNIQUE (plant_id, plant_reading_time)
 );

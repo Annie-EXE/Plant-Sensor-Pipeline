@@ -1,14 +1,22 @@
 """Transfers old data from the short term db to the long term db"""
 
-from os import environ
+from os import environ, _Environ
 
 from dotenv import load_dotenv
 from psycopg2 import connect
 from psycopg2.extensions import connection, cursor
 
 
-def get_db_connection_lt(config: dict) -> connection:
-    """Returns connection to long term database"""
+def get_db_connection_lt(config: _Environ) -> connection:
+    """
+    Returns connection to long term database
+
+    Args:
+        config (_Environ): A file containing sensitive values
+
+    Returns:
+        connection: A connection to a Postgres database
+    """
 
     return connect(dbname=config["DB_NAME"],
                    user=config["DB_USER"],
@@ -18,7 +26,17 @@ def get_db_connection_lt(config: dict) -> connection:
 
 
 def commit_and_close_cursor(conn: connection, cur: cursor) -> None:
-    """Commits changes and closes cursor"""
+    """
+    Commits changes and closes cursor
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+       cur (cursor): An object to send commands to a PostgreSQL database session
+
+    Returns:
+        None
+    """
 
     conn.commit()
 
@@ -29,6 +47,12 @@ def transfer_botanist_table(conn: connection) -> None:
     """
     Transfers data in botanist from short_term to long_term schema
     Will only transfer data that does not exist already in the long term
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -49,6 +73,12 @@ def transfer_plant_table(conn: connection) -> None:
     """
     Transfers data in plant from the short_term schema to the long_term schema
     Will only transfer for plant entries that do not already exist in both tables
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -69,6 +99,12 @@ def transfer_water_history_table(conn: connection) -> None:
     """
     Transfers data in water_history from the short_term schema to the long_term schema
     Will only transfer for plant entries that do not already exist in both tables
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -86,6 +122,12 @@ def transfer_reading_information_table(conn: connection) -> None:
     """
     Transfers data in reading_information from short_term to long_term schema
     Will only transfer data that does not already exist in the long_term schema
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -103,7 +145,15 @@ def transfer_reading_information_table(conn: connection) -> None:
 
 
 def delete_data_from_over_24_hours_reading_information_table(conn: connection) -> None:
-    """Deletes all data from reading_information that is older than 24 hours"""
+    """
+    Deletes all data from reading_information that is older than 24 hours
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
+    """
 
     cur = conn.cursor()
 
@@ -115,7 +165,16 @@ def delete_data_from_over_24_hours_reading_information_table(conn: connection) -
 
 
 def delete_data_from_over_24_hours_water_history_table(conn: connection) -> None:
-    """Deletes all data from water_history that is older than 24 hours"""
+    """
+    Deletes all data from water_history that is older than 24 hours
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
+
+    """
 
     cur = conn.cursor()
 
@@ -130,6 +189,12 @@ def transfer_shade_condition_table(conn: connection) -> None:
     """
     Transfers data in shade_condition from short_term to long_term schema
     Will only transfer data that does not already exist in the long_term schema
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -150,6 +215,12 @@ def transfer_sun_condition_table(conn: connection) -> None:
     """
     Transfers data in sun_condition from short_term to long_term schema
     Will only transfer data that does not already exist in the long_term schema
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()
@@ -172,6 +243,12 @@ def transfer_plant_origin_table(conn: connection) -> None:
     """
     Transfers data in plant_origin from short_term to long_term schema
     Will only transfer data that does not already exist in the long_term schema
+
+    Args:
+       conn (connection): A connection to a Postgres database
+
+    Returns:
+        None
     """
 
     cur = conn.cursor()

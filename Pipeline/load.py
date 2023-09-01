@@ -182,8 +182,6 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 
     with conn.cursor() as cur:
 
-        print(reading_info)
-
         cur.executemany("""INSERT INTO reading_information
                     (plant_id, plant_reading_time, botanist_id,
                     temperature, soil_moisture, 

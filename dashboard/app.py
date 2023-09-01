@@ -12,6 +12,15 @@ from psycopg2.extensions import connection
 
 
 def get_db_connection(config_file: _Environ) -> connection:
+    """
+    Returns connection to the database
+
+    Args:
+        config (_Environ): A file containing sensitive values
+
+    Returns:
+        connection: A connection to a Postgres database
+    """
     try:
         return connect(
             database=config_file["DB_NAME"],
@@ -26,7 +35,18 @@ def get_db_connection(config_file: _Environ) -> connection:
 
 
 def get_database(conn_postgres: connection, schema: str) -> DataFrame:
-    """Returns redshift database transaction table as a DataFrame Object"""
+    """
+    Returns redshift database transaction table as a DataFrame Object
+
+    Args:
+        conn_postgres (connection): A connection to a Postgres database
+
+        schema (str): A string representing the schema path within the Postgres
+        database where data tables are stored
+
+    Returns:
+        DataFrame
+    """
     query = f"SELECT \
             reading_information_id, plant_reading_time AS reading_time,\
             soil_moisture, temperature, sun_condition_type AS sun_condition,\
@@ -49,31 +69,17 @@ def get_database(conn_postgres: connection, schema: str) -> DataFrame:
     return df
 
 
-def dashboard_header(header_title: str, sub_title: str = None) -> None:
-    """Displays the dashboard header"""
-    st.markdown(f"## {header_title.title()}")
-    if sub_title:
-        st.markdown(
-            "A dashboard representing _**relevant data**_ for the plants")
+def dashboard_header() -> None:
+    """Build header for dashboard to give it a title"""
+
+    st.title("Tasty Truck Treats (T3): Food Trucks Transaction Dashboard")
+    st.markdown("_An app for visualizing data all about **trucks**_")
 
 
 def create_chart_title(chart_title: str) -> None:
     """Creates chart chart_title"""
 
     st.markdown(f"### {chart_title.title()}")
-
-
-def get_df_from_sql(conn: connection, table_name: str) -> DataFrame:
-    """Returns df from SQL query"""
-    with conn.cursor() as cur:
-        cur.execute(f"SELECT * FROM {table_name}")
-        data = cur.fetchall()
-        column_names = [desc[0] for desc in cur.description]
-        df = pd.DataFrame(data, columns=column_names)
-
-    conn.commit()
-
-    return df
 
 
 def bar_chart_to_show_water_frequency(water_df: DataFrame):
@@ -130,7 +136,7 @@ if __name__ == "__main__":
 
     plant_df = get_database(conn, config["SCHEMA"])
 
-    # dashboard_header('plants', 'p l a n t s')
+    dashboard_header()
 
     # water_df = get_df_from_sql(conn, 'water_history')
     # reading_df = get_df_from_sql(conn, 'reading_information')

@@ -41,6 +41,7 @@ DB_PASSWORD = XXX
 DB_HOST = XXX
 DB_PORT = XXX
 DB_NAME = XXX
+SCHEMA = XXX
 ```
 
 ## Pipeline

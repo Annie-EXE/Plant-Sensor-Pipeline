@@ -35,6 +35,17 @@ def get_db_connection(config_file: _Environ) -> connection:
         raise err
 
 
+def switch_to_long_term_schema(conn: connection) -> None:
+    """
+    Switches active schema to 
+    the long term schema
+    """
+    with conn.cursor() as cur:
+
+        cur.execute("SET search_path TO long_term;")
+    
+    conn.commit()
+
 
 def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
     """

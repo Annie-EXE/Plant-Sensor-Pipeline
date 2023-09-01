@@ -34,6 +34,10 @@ resource "aws_db_instance" "c8-prodge-rds-db" {
   vpc_security_group_ids = [aws_security_group.c8-prodge-rds-sg.id]
 }
 
+resource "aws_ecs_cluster" "c8-prodge-cluster" {
+  name = "c8-prodge-cluster"
+}
+
 resource "aws_ecr_repository" "c8-prodge-dashboard-ecr" {
   name                 = "c8-prodge-dashboard-ecr"
   image_tag_mutability = "MUTABLE"
@@ -57,7 +61,7 @@ resource "aws_ecs_task_definition" "c8-prodge-dashboard-task-definition" {
   container_definitions = jsonencode([
     {
       name      = "c8-prodge-streamlit-container"
-      image     = ""
+      image     = aws_ecr_image.c8-prodge-dashboard-ecr-latest_image
       cpu       = 10
       memory    = 512
       essential = true

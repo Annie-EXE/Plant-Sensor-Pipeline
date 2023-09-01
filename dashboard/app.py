@@ -25,6 +25,42 @@ def get_db_connection(config_file: _Environ) -> connection:
         raise err
 
 
+# def get_database_longterm(conn_postgres: connection, schema: str) -> DataFrame:
+#     """Returns redshift database transaction table as a DataFrame Object"""
+#     with conn.cursor() as curr:
+#         curr.execute(f"SELECT \
+#                     truck_id, transaction_time, transaction_date, payment_type AS type, total_value AS total\
+#                     FROM {schema}.transaction_fact AS transaction \
+#                     LEFT JOIN {schema}.date_dim AS date ON \
+#                     transaction.date_id=date.date_id \
+#                     LEFT JOIN {schema}.type_dim AS type ON \
+#                     transaction.type_id=type.type_id;")
+
+#         transaction_df = curr.fetch_dataframe()
+
+#     # transaction_df["timestamp"] = transaction_df.apply(lambda row: datetime.combine(
+#     #     row["transaction_date"], row["transaction_time"]), axis=1)
+
+#     return transaction_df
+
+
+# def get_database_shortterm(conn_postgres: connection) -> DataFrame:
+#     """Returns redshift database transaction table as a DataFrame Object"""
+#     query = f"SELECT \
+#             reading_information_id, plant_reading_time AS reading_time, soil_moisture, temperature\
+#             FROM reading_information as reading\
+#             LEFT JOIN sun_condition AS sun ON \
+#             reading.shade_condition_id=sun.shade_condition_id \
+#             LEFT JOIN shade_condition AS shade ON \
+#             reading.shade_condition_id=shade.shade_condition_id;"
+
+#     df = pd.read_sql_query(query, conn_postgres)
+
+#     print(df)
+
+#     return df
+
+
 def dashboard_header(header_title: str, sub_title: str = None) -> None:
     """Displays the dashboard header"""
     st.markdown(f"## {header_title.title()}")
@@ -104,17 +140,7 @@ if __name__ == "__main__":
 
     conn = get_db_connection(config)
 
-    # config["DB_PASSWORD"] = environ.get("DB_PASSWORD")
-    # config["DB_NAME"] = environ.get("DB_NAME")
-    # config["DB_USER"] = environ.get("DB_USER")
-    # config["DB_HOST"] = environ.get("DB_HOST")
-    # config["DB_PORT"] = environ.get("DEB_PORT")
-
-    # conn = connect(database=config["DB_NAME"],
-    #                user=config["DB_USER"],
-    #                password=config["DB_PASSWORD"],
-    #                host=config["DB_HOST"],
-    #                port=config["DB_PORT"])
+    # plant_df = get_database_shortterm(conn)
 
     # dashboard_header('plants', 'p l a n t s')
 

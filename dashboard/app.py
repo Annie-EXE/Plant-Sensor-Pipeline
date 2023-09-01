@@ -2,6 +2,7 @@
 
 from os import environ, _Environ
 from dotenv import load_dotenv
+from datetime import datetime
 import pandas as pd
 from pandas import DataFrame
 import streamlit as st
@@ -9,6 +10,7 @@ import matplotlib.pyplot as plt
 import psycopg2
 from psycopg2 import connect
 from psycopg2.extensions import connection
+import altair as alt
 
 
 def get_db_connection(config_file: _Environ) -> connection:
@@ -45,7 +47,7 @@ def get_database(conn_postgres: connection, schema: str) -> DataFrame:
         database where data tables are stored
 
     Returns:
-        DataFrame
+        DataFrame:  A pandas DataFrame containing all relevant plant data
     """
     query = f"SELECT \
             reading_information_id, plant_reading_time AS reading_time,\
@@ -70,10 +72,75 @@ def get_database(conn_postgres: connection, schema: str) -> DataFrame:
 
 
 def dashboard_header() -> None:
-    """Build header for dashboard to give it a title"""
+    """
+    Build header for dashboard to give it a title
 
-    st.title("Tasty Truck Treats (T3): Food Trucks Transaction Dashboard")
-    st.markdown("_An app for visualizing data all about **trucks**_")
+    Args:
+        None
+
+    Returns:
+        None
+    """
+
+    st.title("Liverpool Natural History Museum: Plant Health Monitoring Dashboard")
+    st.markdown("_An app for visualizing data all about **plants**_")
+
+
+def build_sidebar_plants() -> list:
+    """
+    Build sidebar with dropdown menu options
+
+    Args:
+        None
+
+    Returns:
+        list: A list with values corresponding to plant names for which readings exist in the data base
+    """
+    selected_plants = st.sidebar.multiselect(
+        "Plant", options=sorted(plant_df["plant_name"].unique()))
+    return selected_plants
+
+
+def build_sidebar_dates() -> list:
+    """
+    Build sidebar with dropdown menu options
+
+    Args:
+        None
+
+    Returns:
+        list: A list with values corresponding to dates for which readings exist in the data base
+    """
+    selected_dates = st.sidebar.multiselect(
+        "Reading Time", options=plant_df["reading_time"].dt.date.unique())
+    return selected_dates
+
+
+def headline_figures(df: DataFrame, plants: list[int], dates: list[datetime]) -> None:
+    """Build headline for dashboard to present key figures for quick view of overall data"""
+
+    cols = st.columns(4)
+
+    if len(plants) != 0:
+        df = df[df["plant_name"].isin(plants)]
+
+    if len(dates) != 0:
+        df = df[df["timestamp"].dt.floor("D").isin(dates)]
+
+    total_active_days = df.groupby(
+        pd.Grouper(key='reading_time', freq="1D")).size().count()
+
+    with cols[0]:
+        st.metric("Total Plants:", df["plant_name"].nunique())
+    with cols[1]:
+        st.metric("Total Days Active:",
+                  total_active_days)
+    with cols[2]:
+        st.metric("Total Readings:",
+                  df.shape[0])
+    with cols[3]:
+        st.metric("Number of Botanists :",
+                  df["botanist_name"].nunique())
 
 
 def create_chart_title(chart_title: str) -> None:
@@ -82,49 +149,56 @@ def create_chart_title(chart_title: str) -> None:
     st.markdown(f"### {chart_title.title()}")
 
 
-def bar_chart_to_show_water_frequency(water_df: DataFrame):
-    """Makes a bar chart that shows how often
-    each plant has been watered"""
+def plot_readings_per_plant(dataframe: DataFrame, plants: list[int], dates: list[datetime]) -> None:
+    """Create a bar chart for the readings logged per plant"""
+    if len(plants) != 0:
+        dataframe = dataframe[dataframe["plant_name"].isin(plants)]
+    if len(dates) != 0:
+        dataframe = dataframe[dataframe["reading_time"].dt.floor(
+            "D").isin(dates)]
 
-    counts = water_df['plant_id'].value_counts()
+    readings_per_plant = dataframe.groupby(
+        "plant_name").size().reset_index()
+    readings_per_plant.columns = ["Plant Name", "Number of readings"]
 
-    plt.figure(figsize=(60, 30))
-    plt.bar(counts.index, counts.values, width=0.5, color='#44d4eb')
-    plt.xticks(counts.index, counts.index, rotation=90, fontsize=50)
-    plt.xlabel("\nPlant ID", fontsize=100)
-    plt.ylabel("Times Watered", fontsize=100)
-    plt.title("Watering Frequency\n", fontsize=200)
-
-    st.pyplot(plt)
+    st.title("Number of Readings per Plant")
+    st.bar_chart(data=readings_per_plant,
+                 x="Plant Name", y="Number of readings")
 
 
-def plot_average_temperatures(reading_df: DataFrame):
+def plot_average_temperatures(df: DataFrame, plants: list[int], dates: list[datetime]):
     """Plots the average temperature of each plant"""
 
-    average_temperatures = reading_df.groupby('plant_id')['temperature'].mean()
+    if len(plants) != 0:
+        dataframe = dataframe[dataframe["plant_name"].isin(plants)]
+    if len(dates) != 0:
+        dataframe = dataframe[dataframe["reading_time"].dt.floor(
+            "D").isin(dates)]
 
-    plt.bar(average_temperatures.index,
-            average_temperatures.values, color='#fa9196')
+    average_temperatures = df.groupby(
+        'plant_name')['temperature'].mean().reset_index()
+    average_temperatures.columns = ["Plant Name", "Average Temperature (°C)"]
 
-    plt.xlabel('\nPlant ID')
-    plt.ylabel('Average Temperature')
-    plt.title('\nAverage Temperature for Each Plant ID\n', fontsize=200)
-
-    st.pyplot(plt)
+    st.title("Average Temperature per Plant")
+    st.bar_chart(data=average_temperatures,
+                 x="Plant Name", y="Average Temperature (°C)")
 
 
-def plot_average_soil_moisture(reading_df: DataFrame):
+def plot_average_soil_moisture(df: DataFrame, plants: list[int], dates: list[datetime]):
     """Plots the average soil moisture for each plant"""
+    if len(plants) != 0:
+        dataframe = dataframe[dataframe["plant_name"].isin(plants)]
+    if len(dates) != 0:
+        dataframe = dataframe[dataframe["reading_time"].dt.floor(
+            "D").isin(dates)]
 
-    avg_soil_moisture = reading_df.groupby('plant_id')['soil_moisture'].mean()
+    avg_soil_moisture = df.groupby('plant_name')[
+        'soil_moisture'].mean().reset_index()
+    avg_soil_moisture.columns = ["Plant Name", "Average Soil Moisture"]
 
-    plt.bar(avg_soil_moisture.index, avg_soil_moisture.values, color='#7d4807')
-
-    plt.xlabel('\nPlant ID')
-    plt.ylabel('Average Soil Moisture')
-    plt.title('\nAverage Soil Moisture for Each Plant ID\n', fontsize=200)
-
-    st.pyplot(plt)
+    st.title("Average Soil Moisture per Plant")
+    st.bar_chart(data=avg_soil_moisture,
+                 x="Plant Name", y="Average Soil Moisture")
 
 
 if __name__ == "__main__":
@@ -138,17 +212,14 @@ if __name__ == "__main__":
 
     dashboard_header()
 
-    # water_df = get_df_from_sql(conn, 'water_history')
-    # reading_df = get_df_from_sql(conn, 'reading_information')
-    # plants_df = get_df_from_sql(conn, 'plant')
-    # reading_df = pd.merge(
-    #     reading_df, plants_df[['plant_id', 'plant_name']], on='plant_id', how='left')
-    # print(reading_df[['plant_id', 'plant_name']])
+    selected_plants = build_sidebar_plants()
 
-    # bar_chart_to_show_water_frequency(water_df)
-    # print(reading_df['soil_moisture'])
+    selected_dates = build_sidebar_dates()
 
-    # plot_average_temperatures(reading_df)
-    # plot_average_soil_moisture(reading_df)
+    headline_figures(plant_df, selected_plants, selected_dates)
 
-    # print(plants_df)
+    plot_average_temperatures(plant_df, selected_plants, selected_dates)
+    plot_average_soil_moisture(plant_df, selected_plants, selected_dates)
+    plot_readings_per_plant(plant_df, selected_plants, selected_dates)
+
+    print(plant_df.groupby('plant_name')['soil_moisture'].mean().reset_index())

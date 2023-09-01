@@ -34,11 +34,39 @@ resource "aws_db_instance" "c8-prodge-rds-db" {
   vpc_security_group_ids = [aws_security_group.c8-prodge-rds-sg.id]
 }
 
-resource "aws_ecr_repository" "c8-prodge-dashbpard-ecr" {
-  name                 = "c8-prodge-dashbpard-ecr"
+resource "aws_ecr_repository" "c8-prodge-dashboard-ecr" {
+  name                 = "c8-prodge-dashboard-ecr"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
     scan_on_push = false
   }
+}
+
+data "aws_ecr_image" "c8-prodge-dashboard-ecr-latest_image" {
+  repository_name = aws_ecr_repository.c8-prodge-dashboard-ecr.name
+  image_tag       = "latest"
+}
+
+resource "aws_ecs_task_definition" "c8-prodge-dashboard-task-definition" {
+  family = "c8-prodge-dashboard-task-definition"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 3072
+  container_definitions = jsonencode([
+    {
+      name      = "c8-prodge-streamlit-container"
+      image     = ""
+      cpu       = 10
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+        }
+      ]
+    }
+  ])
 }

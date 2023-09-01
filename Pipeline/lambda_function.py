@@ -19,7 +19,8 @@ from load import (
     insert_into_botanist_table,
     insert_into_water_history_table,
     insert_into_reading_information_table,
-    delete_old_rows
+    delete_old_rows,
+    switch_to_long_term_schema
 )
 
 
@@ -48,8 +49,15 @@ def lambda_handler(event, context) -> dict:
     insert_into_botanist_table(conn, plant_df)
     insert_into_water_history_table(conn, plant_df)
     insert_into_reading_information_table(conn, plant_df)
-
     delete_old_rows(conn)
+
+    switch_to_long_term_schema(conn)
+
+    insert_into_plant_origin_table(conn, plant_df)
+    insert_into_plant_table(conn, plant_df)
+    insert_into_botanist_table(conn, plant_df)
+    insert_into_water_history_table(conn, plant_df)
+    insert_into_reading_information_table(conn, plant_df)
 
     conn.close()
 

@@ -35,24 +35,29 @@ def get_db_connection(config_file: _Environ) -> connection:
         raise err
 
 
-def switch_to_long_term_schema(conn: connection) -> None:
+def switch_to_long_term_schema(conn_postgres: connection) -> None:
     """
-    Switches active schema to 
-    the long term schema
+    Switches active schema to the long term schema
+
+    Args:
+        conn_postgres (connection):  A connection to a Postgres database
+
+    Returns:
+        None
     """
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.execute("SET search_path TO long_term;")
-    
-    conn.commit()
+
+    conn_postgres.commit()
 
 
-def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
+def insert_into_plant_origin_table(conn_postgres: connection, data: DataFrame) -> None:
     """
     Inserts information into plant_origin table
 
     Args:
-        conn (connection): A connection to a Postgres database
+        conn_postgres (connection): A connection to a Postgres database
 
         data (DataFrame): A DataFrame containing transformed data for all plants
 
@@ -63,7 +68,7 @@ def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
     origin_info = data[['plant_latitude', 'plant_longitude',
                         'plant_location']].values.tolist()
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.executemany("""INSERT INTO plant_origin
                     (latitude, longitude, country)
@@ -72,15 +77,15 @@ def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
                     ON CONFLICT DO NOTHING;
                     """, origin_info)
 
-    conn.commit()
+    conn_postgres.commit()
 
 
-def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
+def insert_into_plant_table(conn_postgres: connection, data: DataFrame) -> None:
     """
     Inserts information into plant table
 
     Args:
-        conn (connection): A connection to a Postgres database
+        conn_postgres (connection): A connection to a Postgres database
 
         data (DataFrame): A DataFrame containing transformed data for all plants
 
@@ -91,7 +96,7 @@ def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
     plant_info = data[['plant_id', 'plant_name', 'scientific_name',
                        'plant_latitude', 'plant_longitude']].values.tolist()
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.executemany("""INSERT INTO plant
                     (plant_id,
@@ -105,15 +110,15 @@ def insert_into_plant_table(conn: connection, data: DataFrame) -> None:
                     ON CONFLICT DO NOTHING;
                     """, plant_info)
 
-    conn.commit()
+    conn_postgres.commit()
 
 
-def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
+def insert_into_botanist_table(conn_postgres: connection, data: DataFrame) -> None:
     """
     Inserts information into botanist table
 
     Args:
-        conn (connection): A connection to a Postgres database
+        conn_postgres (connection): A connection to a Postgres database
 
         data (DataFrame): A DataFrame containing transformed data for all plants
 
@@ -124,7 +129,7 @@ def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
     botanist_info = data[['botanist_name', 'botanist_email',
                           'botanist_phone_number']].values.tolist()
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.executemany("""INSERT INTO botanist
                     (botanist_name, botanist_email, botanist_phone_number)
@@ -133,15 +138,15 @@ def insert_into_botanist_table(conn: connection, data: DataFrame) -> None:
                     ON CONFLICT DO NOTHING;
                     """, botanist_info)
 
-    conn.commit()
+    conn_postgres.commit()
 
 
-def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
+def insert_into_water_history_table(conn_postgres: connection, data: DataFrame) -> None:
     """
     Inserts information into water_history table
 
     Args:
-        conn (connection): A connection to a Postgres database
+        conn_postgres (connection): A connection to a Postgres database
 
         data (DataFrame): A DataFrame containing transformed data for all plants
 
@@ -151,7 +156,7 @@ def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
 
     watering_info = data[['last_watered', 'plant_id']].values.tolist()
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.executemany("""INSERT INTO water_history
                     (time_watered, plant_id)
@@ -160,15 +165,15 @@ def insert_into_water_history_table(conn: connection, data: DataFrame) -> None:
                     ON CONFLICT DO NOTHING;
                     """, watering_info)
 
-    conn.commit()
+    conn_postgres.commit()
 
 
-def insert_into_reading_information_table(conn: connection, data: DataFrame) -> None:
+def insert_into_reading_information_table(conn_postgres: connection, data: DataFrame) -> None:
     """
     Inserts information into reading_information table
 
     Args:
-        conn (connection): A connection to a Postgres database
+        conn_postgres (connection): A connection to a Postgres database
 
         data (DataFrame): A DataFrame containing transformed data for all plants
 
@@ -180,7 +185,7 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
                          'temperature', 'soil_moisture', 'sun_condition',
                          'shade_condition']].values.tolist()
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
 
         cur.executemany("""INSERT INTO reading_information
                     (plant_id, plant_reading_time, botanist_id,
@@ -195,21 +200,21 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
                     ON CONFLICT DO NOTHING;
                     """, reading_info)
 
-    conn.commit()
+    conn_postgres.commit()
 
 
-def delete_old_rows(conn: connection):
+def delete_old_rows(conn_postgres: connection):
     """Deletes rows if the timestamp is more than 24hrs prior"""
 
     twenty_four_hours_ago = str(datetime.now() - timedelta(hours=24))
 
-    with conn.cursor() as cur:
+    with conn_postgres.cursor() as cur:
         cur.execute(
             "DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
         cur.execute("DELETE FROM water_history WHERE time_watered < %s",
                     (twenty_four_hours_ago,))
 
-    conn.commit()
+    conn_postgres.commit()
 
 
 if __name__ == "__main__":
@@ -231,7 +236,7 @@ if __name__ == "__main__":
     insert_into_water_history_table(conn, data)
 
     insert_into_reading_information_table(conn, data)
-    
+
     # delete_old_rows(conn)
 
     conn.close()

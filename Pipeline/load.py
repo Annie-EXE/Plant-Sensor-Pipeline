@@ -22,11 +22,9 @@ def get_db_connection(config_file: _Environ) -> connection:
     Returns:
         connection: A connection to a Postgres database
     """
-
     try:
         return connect(
-            database="practice",
-            # database=config_file["DB_NAME"],
+            database=config_file["DB_NAME"],
             user=config_file["DB_USER"],
             password=config_file["DB_PASSWORD"],
             port=config_file["DB_PORT"],
@@ -35,6 +33,7 @@ def get_db_connection(config_file: _Environ) -> connection:
     except Exception as err:
         print("Error connecting to database.")
         raise err
+
 
 
 def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
@@ -193,7 +192,7 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 def delete_old_rows(conn: connection):
     """Deletes rows if the timestamp is more than 24hrs prior"""
 
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+    twenty_four_hours_ago = str(datetime.now() - timedelta(hours=24))
 
     with conn.cursor() as cur:
         cur.execute(
@@ -223,5 +222,7 @@ if __name__ == "__main__":
     insert_into_water_history_table(conn, data)
 
     insert_into_reading_information_table(conn, data)
+    
+    # delete_old_rows(conn)
 
     conn.close()

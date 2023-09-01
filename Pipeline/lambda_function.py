@@ -35,27 +35,18 @@ def lambda_handler(event, context) -> dict:
     api_path = environ.get("API_PATH")
 
     all_plants_data = get_all_plants_data(api_path)
-
     unicode_free_plants_data = clean_unicode_from_plant_data(all_plants_data)
-
     flatted_plant_data = flatten_data(unicode_free_plants_data)
-
     plant_df = build_plant_dataframe(flatted_plant_data)
-
     plant_df = plant_df.dropna(subset=['last_watered', 'recording_time'])
 
     config = environ
-
     conn = get_db_connection(config)
 
     insert_into_plant_origin_table(conn, plant_df)
-
     insert_into_plant_table(conn, plant_df)
-
     insert_into_botanist_table(conn, plant_df)
-
     insert_into_water_history_table(conn, plant_df)
-
     insert_into_reading_information_table(conn, plant_df)
 
     delete_old_rows(conn)

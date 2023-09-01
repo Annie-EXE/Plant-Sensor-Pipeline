@@ -33,3 +33,12 @@ resource "aws_db_instance" "c8-prodge-rds-db" {
   db_subnet_group_name = "public_subnet_group"
   vpc_security_group_ids = [aws_security_group.c8-prodge-rds-sg.id]
 }
+
+resource "aws_ecr_repository" "c8-prodge-dashbpard-ecr" {
+  name                 = "c8-prodge-dashbpard-ecr"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = false
+  }
+}

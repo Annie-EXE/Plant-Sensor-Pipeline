@@ -12,7 +12,7 @@ import pandas as pd
 from pandas import DataFrame
 
 
-def get_db_connection(config: _Environ) -> connection:
+def get_db_connection(config_file: _Environ) -> connection:
     """
     Returns connection to the database
 
@@ -22,12 +22,18 @@ def get_db_connection(config: _Environ) -> connection:
     Returns:
         connection: A connection to a Postgres database
     """
+    try:
+        return connect(
+            database=config_file["DB_NAME"],
+            user=config_file["DB_USER"],
+            password=config_file["DB_PASSWORD"],
+            port=config_file["DB_PORT"],
+            host=config_file["DB_HOST"]
+        )
+    except Exception as err:
+        print("Error connecting to database.")
+        raise err
 
-    return connect(dbname=config["DB_NAME"],
-                   user=config["DB_USER"],
-                   password=config["DB_PASSWORD"],
-                   host=config["DB_HOST"],
-                   port=config["DB_PORT"])
 
 
 def insert_into_plant_origin_table(conn: connection, data: DataFrame) -> None:
@@ -189,8 +195,10 @@ def delete_old_rows(conn: connection):
     twenty_four_hours_ago = str(datetime.now() - timedelta(hours=24))
 
     with conn.cursor() as cur:
-        cur.execute("DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
-        cur.execute("DELETE FROM water_history WHERE time_watered < %s", (twenty_four_hours_ago,))
+        cur.execute(
+            "DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
+        cur.execute("DELETE FROM water_history WHERE time_watered < %s",
+                    (twenty_four_hours_ago,))
 
     conn.commit()
 

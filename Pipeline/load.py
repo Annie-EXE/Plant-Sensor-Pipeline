@@ -23,11 +23,9 @@ def get_db_connection(config: _Environ) -> connection:
         connection: A connection to a Postgres database
     """
 
-    return connect(dbname='practice',
-                   #    dbname=config["DB_NAME"],
+    return connect(dbname=config["DB_NAME"],
                    user=config["DB_USER"],
                    password=config["DB_PASSWORD"],
-                   #    dbname=config["DB_NAME"],
                    host=config["DB_HOST"],
                    port=config["DB_PORT"])
 
@@ -188,7 +186,7 @@ def insert_into_reading_information_table(conn: connection, data: DataFrame) -> 
 def delete_old_rows(conn: connection):
     """Deletes rows if the timestamp is more than 24hrs prior"""
 
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+    twenty_four_hours_ago = str(datetime.now() - timedelta(hours=24))
 
     with conn.cursor() as cur:
         cur.execute("DELETE FROM reading_information WHERE plant_reading_time < %s", (twenty_four_hours_ago,))
@@ -216,5 +214,7 @@ if __name__ == "__main__":
     insert_into_water_history_table(conn, data)
 
     insert_into_reading_information_table(conn, data)
+    
+    # delete_old_rows(conn)
 
     conn.close()

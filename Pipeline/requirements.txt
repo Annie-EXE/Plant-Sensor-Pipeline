@@ -1,0 +1,10 @@
+matplotlib-inline==0.1.6
+numpy==1.25.2
+pandas==2.0.3
+python-dotenv
+pytest
+python-dateutil
+requests 
+psycopg2
+streamlit
+matplotlib

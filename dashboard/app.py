@@ -125,7 +125,7 @@ def headline_figures(df: DataFrame, plants: list[int], dates: list[datetime]) ->
         df = df[df["plant_name"].isin(plants)]
 
     if len(dates) != 0:
-        df = df[df["timestamp"].dt.floor("D").isin(dates)]
+        df = df[df["reading_time"].dt.floor("D").isin(dates)]
 
     total_active_days = df.groupby(
         pd.Grouper(key='reading_time', freq="1D")).size().count()
@@ -170,9 +170,9 @@ def plot_average_temperatures(df: DataFrame, plants: list[int], dates: list[date
     """Plots the average temperature of each plant"""
 
     if len(plants) != 0:
-        dataframe = dataframe[dataframe["plant_name"].isin(plants)]
+        df = df[df["plant_name"].isin(plants)]
     if len(dates) != 0:
-        dataframe = dataframe[dataframe["reading_time"].dt.floor(
+        df = df[df["reading_time"].dt.floor(
             "D").isin(dates)]
 
     average_temperatures = df.groupby(
@@ -187,9 +187,9 @@ def plot_average_temperatures(df: DataFrame, plants: list[int], dates: list[date
 def plot_average_soil_moisture(df: DataFrame, plants: list[int], dates: list[datetime]):
     """Plots the average soil moisture for each plant"""
     if len(plants) != 0:
-        dataframe = dataframe[dataframe["plant_name"].isin(plants)]
+        df = df[df["plant_name"].isin(plants)]
     if len(dates) != 0:
-        dataframe = dataframe[dataframe["reading_time"].dt.floor(
+        df = df[df["reading_time"].dt.floor(
             "D").isin(dates)]
 
     avg_soil_moisture = df.groupby('plant_name')[
